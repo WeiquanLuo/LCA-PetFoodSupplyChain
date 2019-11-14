@@ -8,3 +8,10 @@ The goal of rivertopo is to …
 ## Hightlight
 
 ## Workflow
+
+<center>
+
+![LCA:Pet Food Supply
+Chain](doc/LCA_%20Pet%20Food%20Supply%20Chain%20.png)
+
+</center>

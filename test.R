@@ -18,6 +18,7 @@ for (i in 1:length(temp)){
 
 # obtain colname as individual vector
 cols <- readxl::read_excel("data/Columns name.xlsx", col_names=FALSE)
+
 for (i in 1: nrow(cols)){
   col <-cols[i,]
   col <- col %>% flatten_chr() %>% na.omit()
@@ -26,14 +27,33 @@ for (i in 1: nrow(cols)){
 }
 
 remove2ndcol <- function(df){
-  df<- df[,-2]
+  df <- df[,-2]
   return(df)
 }
 
+
+sumSector_sub <- function(df){
+  df <- df %>% group_by(Sector) %>% summarise_all(funs(sum))
+  return(df)
+}
+
+
 # assign col name to df
-eeno %>% remove2ndcol %>% setNames(c("Sector", EconomicActivity)) %>% as_tibble()
-conv %>% remove2ndcol %>% setNames(c("Sector", ConventionalAirPollutants)) %>% as_tibble()
-fuels %>% remove2ndcol %>% setNames(c("Sector", Energy)) %>% as_tibble()
-gwp %>% remove2ndcol %>% setNames(c("Sector", GreenhoseGases)) %>% as_tibble()
-trisect %>% remove2ndcol %>% setNames(c("Sector", ToxicReleases)) %>% as_tibble()
-water %>% remove2ndcol %>% setNames(c("Sector", WaterWithdrawals)) %>% as_tibble()
+eeno <- eeno %>% remove2ndcol %>% setNames(c("Sector", EconomicActivity)) %>% as_tibble() %>% sumSector_sub
+conv <- conv %>% remove2ndcol %>% setNames(c("Sector", ConventionalAirPollutants)) %>% as_tibble() %>% sumSector_sub
+fuels <- fuels %>% remove2ndcol %>% setNames(c("Sector", Energy)) %>% as_tibble() %>% sumSector_sub
+gwp <- gwp %>% remove2ndcol %>% setNames(c("Sector", GreenhoseGases)) %>% as_tibble() %>% sumSector_sub
+trisect <- trisect %>% remove2ndcol %>% setNames(c("Sector", ToxicReleases)) %>% as_tibble() %>% sumSector_sub
+water <- water %>% remove2ndcol %>% setNames(c("Sector", WaterWithdrawals)) %>% as_tibble() %>% sumSector_sub
+
+# cbind
+dat <- eeno %>% 
+  full_join(conv, by = "Sector") %>% 
+  full_join(fuels, by = "Sector") %>% 
+  full_join(gwp, by = "Sector") %>% 
+  full_join(trisect, by = "Sector") %>% 
+  full_join(water, by = "Sector")
+
+write.csv(dat, "data/dat_311111_1M.csv")
+
+

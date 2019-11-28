@@ -25,10 +25,15 @@ for (i in 1: nrow(cols)){
   assign(col1, col[-1])
 }
 
+remove2ndcol <- function(df){
+  df<- df[,-2]
+  return(df)
+}
 
-
-
-
-
-
-
+# assign col name to df
+eeno %>% remove2ndcol %>% setNames(c("Sector", EconomicActivity)) %>% as_tibble()
+conv %>% remove2ndcol %>% setNames(c("Sector", ConventionalAirPollutants)) %>% as_tibble()
+fuels %>% remove2ndcol %>% setNames(c("Sector", Energy)) %>% as_tibble()
+gwp %>% remove2ndcol %>% setNames(c("Sector", GreenhoseGases)) %>% as_tibble()
+trisect %>% remove2ndcol %>% setNames(c("Sector", ToxicReleases)) %>% as_tibble()
+water %>% remove2ndcol %>% setNames(c("Sector", WaterWithdrawals)) %>% as_tibble()

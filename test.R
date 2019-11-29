@@ -48,7 +48,7 @@ water <- water %>% remove2ndcol %>% setNames(c("Sector", WaterWithdrawals)) %>% 
 
 # cbind
 dat <- eeno %>% 
-  full_join(conv, by = "Sector") %>% 
+  full_join(conv, by = "Sector") %>%
   full_join(fuels, by = "Sector") %>% 
   full_join(gwp, by = "Sector") %>% 
   full_join(trisect, by = "Sector") %>% 

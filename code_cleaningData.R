@@ -54,6 +54,27 @@ dat <- eeno %>%
   full_join(trisect, by = "Sector") %>% 
   full_join(water, by = "Sector")
 
-write.csv(dat, "data/dat_311111_1M.csv")
+# fill the sector_sub to 6 digit
+round26Sector <- function(sector){
+  sector <- sector %>% as.character()
+  myfun <- function(s){
+    if (6 - nchar(s) == 1L) s <- paste0(s,"0")
+    if (6 - nchar(s) == 2L) s <- paste0(s,"00")
+    if (6 - nchar(s) == 3L) s <- paste0(s,"000")
+    if (6 - nchar(s) == 4L) s <- paste0(s,"0000")
+    if (6 - nchar(s) == 5L) s <- paste0(s,"00000")
+    return(s)
+    }
+  sector <- map(sector, myfun) %>% unlist
+  return(sector)
+}
+dat <- dat %>% 
+  mutate(Sector_sub = round26Sector(Sector)) %>% 
+  select(Sector_sub, everything(), -Sector) %>% 
+  mutate(Sector_sub = as.numeric(Sector_sub))
 
+# bind sector and sector_sub
+cols <- read.csv("data/NAICS_2002_completed.csv")
+dat2 <- left_join(dat, cols, by= c("Sector_sub" = "Sector_sub")) %>% select(Sector, Description, name_sub, everything())
 
+write.csv(dat2, "data/dat_311111_1M.csv")

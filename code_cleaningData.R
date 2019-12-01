@@ -75,8 +75,10 @@ dat <- dat %>%
 
 # bind sector and sector_sub
 cols <- read.csv("data/NAICS_2002_completed.csv")
-dat2 <- left_join(dat, cols, by= c("Sector_sub" = "Sector_sub")) %>% select(Sector, Description, name_sub, everything())
+dat2 <- left_join(dat, cols, by= c("Sector_sub" = "Sector_sub")) %>% 
+  select(Sector, Description, name_sub, everything())
 
 write.csv(dat2, "data/dat_311111_1M.csv")
 
 
+# mannually replace the sector, description, name to appriopriate

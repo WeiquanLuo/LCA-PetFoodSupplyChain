@@ -59,3 +59,6 @@ NAICS_2002 <- NAICS_2002 %>% mutate(Sector_sub = round26Sector(Sector_sub)) %>% 
 write_csv(NAICS_2002, "data/NAICS_2002_completed.csv")
 
 NAICS_2002 <- read.csv("data/NAICS_2002_completed.csv")
+
+
+# remove the duplicate 334510 

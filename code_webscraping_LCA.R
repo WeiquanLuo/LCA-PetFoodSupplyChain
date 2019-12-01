@@ -61,4 +61,4 @@ write_csv(NAICS_2002, "data/NAICS_2002_completed.csv")
 NAICS_2002 <- read.csv("data/NAICS_2002_completed.csv")
 
 
-# remove the duplicate 334510 
+# maually remove the duplicate 334510 ,  323110

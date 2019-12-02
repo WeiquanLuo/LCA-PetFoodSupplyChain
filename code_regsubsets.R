@@ -1,0 +1,72 @@
+# set wd
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+rm(list=ls())
+dev.off()
+
+library(dplyr)
+library(leaps) 
+library(purrr)
+# print.regsub.R
+# Obtain from STAT 401 Dr.Philip Dixon 
+print.regsub <- function(l, sort='BIC', best=NULL) {
+  # function written by PMD, 12 April 2015
+  # print a table with model selection stats 
+  #   based on information produced by summary.regsubsets()
+  # l is an object returned by summary() of a regsubsets() result
+  # sort is a character string with the variable to sort by
+  #   must be one of the names in the print.regsub() output
+  # best is the number of results to print, NULL prints all
+  
+  var <- apply(l$which, 1, function(x){
+    paste(l$obj$xnames[x][-1],collapse=' ' )})
+  nvar <- apply(l$which[,-1], 1, sum)
+  
+  aic <- l$bic - log(l$obj$nn)*nvar + 2*nvar
+  
+  temp <- data.frame(model=var, nvar=nvar, Rsq=l$rsq, AdjRsq=l$adjr2, 
+                     Cp=l$cp, AIC = aic, BIC=l$bic)
+  o <- order(temp[,sort])
+  if (!is.null(best)) {
+    o <- o[1:best] 
+  }
+  temp[o,]
+}
+
+# data input
+dat <- read.csv("data/dat_311111_1M_v2.csv")
+colnames(dat)
+
+# outlier removal
+dat <- dat %>% filter(X != 17)
+
+# target columns 
+CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
+GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
+TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U.ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
+model_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); model_list
+
+# single example
+lm_y <- regsubsets(NH3.t ~ Coal.TJ + NatGase.TJ + Petrol.TJ + Bio.Waste.TJ + NonFossElec.TJ + Water.Withdrawals.Kgal, data = dat, method = "exhaustive", nbest = 5); lm.CPA_CO.t %>% summary()
+print.regsub(lm_y %>% summary, sort='AIC', best=1)
+
+# write a function can iterate regsubset()
+# test: target_nm = "CO.t"
+regsubsets_map <- function(target_nm, dat){
+  # Input columns
+  X <- dat %>% select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
+  # targe columns
+  y <- dat %>% select(target_nm)
+  lm_y <- regsubsets(as.matrix(X), y[,1], method = "exhaustive", nbest = 1)
+  }
+
+model_list <- model_list %>% 
+  mutate(top_model = target %>% 
+           map(function(target_nm) regsubsets_map(target_nm = target_nm,
+                                                  dat= dat))) %>% 
+  mutate(best_model = top_model %>% 
+           map(function(top_model) print.regsub(l = top_model %>% summary, 
+                                            sort='AIC', 
+                                            best=1))) %>% 
+  tidyr::unnest(best_model); model_list
+
+hist(model_list$Rsq)

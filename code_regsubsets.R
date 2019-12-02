@@ -89,11 +89,24 @@ lm_list <- regsubsets_list %>% select(c(target, var)) %>%
   mutate(statisics = lm %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
   tidyr::unnest(statisics); lm_list
 
+regsubsets_list$var
 
-#
+find_var_list <- function(regsubsets_list){
+  vars <- regsubsets_list$var
+  var_nm <- vars %>% stringr::str_split(" ") %>% unlist %>% unique()
+  var_list <- purrr::map_dfc(vars, function(var) stringr::str_detect(string = var, pattern = var_nm))
+  colnames(var_list) <- regsubsets_list$target
+  var_list <- var_list %>% t
+  colnames(var_list) <- var_nm
+  var_list[var_list == 0] <- NA
+  return(var_list)
+}
+var_list <- regsubsets_list %>% find_var_list
+
+# result
 regsubsets_list # result of model selection
 lm_list # result of selected linear model
-
+var_list # result of parameter placeholder
 
 
 

@@ -46,7 +46,7 @@ TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U.g
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list
 
 # single example
-lm_y <- regsubsets(NH3.t ~ Sector + Coal.TJ + NatGase.TJ + Petrol.TJ + Bio.Waste.TJ + NonFossElec.TJ + Water.Withdrawals.Kgal, data = dat, method = "exhaustive", nbest = 5); lm.CPA_CO.t %>% summary()
+lm_y <- regsubsets(NH3.t ~ Sector + Coal.TJ + NatGase.TJ + Petrol.TJ + Bio.Waste.TJ + NonFossElec.TJ + Water.Withdrawals.Kgal, data = dat, method = "exhaustive", nbest = 5);  lm_y %>% summary()
 print.regsub(lm_y %>% summary, sort='AIC', best=1)
 
 # write a function can iterate regsubset()
@@ -82,32 +82,35 @@ fit_model <- function(data, dat){
 lm_list <- regsubsets_list %>% select(c(target, var)) %>% 
   tibble::rowid_to_column("index") %>% 
   tidyr::nest(data = c(target, var)) %>% 
-  mutate(lm = data %>% map(function(data) fit_model(data = data, 
+  mutate(model = data %>% map(function(data) fit_model(data = data, 
                                                               dat = dat))) %>% 
   tidyr::unnest(data) %>% 
-  mutate(anv = lm %>% map(anova)) %>% 
-  mutate(statisics = lm %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
+  mutate(anv = model %>% map(anova)) %>% 
+  mutate(statisics = model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
   tidyr::unnest(statisics); lm_list
 
 regsubsets_list$var
 
-find_var_list <- function(regsubsets_list){
-  vars <- regsubsets_list$var
-  var_nm <- vars %>% stringr::str_split(" ") %>% unlist %>% unique()
-  var_list <- purrr::map_dfc(vars, function(var) stringr::str_detect(string = var, pattern = var_nm))
-  colnames(var_list) <- regsubsets_list$target
-  var_list <- var_list %>% t
-  colnames(var_list) <- var_nm
-  var_list[var_list == 0] <- NA
-  return(var_list)
-}
-var_list <- regsubsets_list %>% find_var_list
+var_list <- lm_list %>% 
+  mutate(coefs = model %>% purrr::map(.f=broom::tidy)) %>% 
+  select(target, coefs) %>% 
+  tidyr::unnest(coefs) %>% 
+  select(target, term, estimate) %>% 
+  tidyr::spread(key= term, value = estimate)
+
+signif_list <- lm_list %>% 
+  mutate(coefs = model %>% purrr::map(.f=broom::tidy)) %>% 
+  select(target, coefs) %>% 
+  tidyr::unnest(coefs) %>% 
+  select(target, term, p.value) %>% 
+  tidyr::spread(key= term, value = p.value)
+
 
 # result
 regsubsets_list # result of model selection
 lm_list # result of selected linear model
-var_list # result of parameter placeholder
-
+var_list # result of coef placeholder
+signif_list # result of signif of coefs placeholder
 
 
 

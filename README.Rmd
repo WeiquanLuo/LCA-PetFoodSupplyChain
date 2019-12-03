@@ -19,10 +19,10 @@ The goal of this project is to study the environmental impact of a certain amoun
 
 * which industry(s) have larger impact among all industries?
 * what are the relationship between some impact relative to the input (ie. Energy, water withdraw)?
+* how the outlier industry(s) behave in linear regression models
 
 
 ## Hightlight
-
 
 1. for dog and cat food Manufacturing, the greatest environmental impacts come frome any raw material production industries such as agricultural farming.
 
@@ -32,6 +32,9 @@ The goal of this project is to study the environmental impact of a certain amoun
 * Emissions of Sulfur Dioxide to Air,
 * weighting of greenhouse gas emissions into the air from the production,
 * Emissions of Carbon Dioxide (CO2) into the air from fossil fuel combus.
+
+3. most of industries use either NonFossoil Eletrecity or Fossoil Eletrecity
+4. for those industries using biowaste as energy source have higher impact in toxic.
 
 ## Workflow
 

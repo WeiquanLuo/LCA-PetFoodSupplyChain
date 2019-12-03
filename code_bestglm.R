@@ -22,11 +22,6 @@ GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list
 
-# single example
-lm_y <- leaps::regsubsets(CO.t ~ Sector + Coal.TJ + NatGase.TJ + Petrol.TJ + Bio.Waste.TJ + NonFossElec.TJ + Water.Withdrawals.Kgal, data = dat, method = "exhaustive", nbest = 5)
-print.regsub(lm_y %>% summary, sort='AIC', best=1)
-
-
 # test: target_nm = "CO.t"
 makedata_map <- function(target_nm, dat){
   # Input columns
@@ -36,20 +31,21 @@ makedata_map <- function(target_nm, dat){
            Water.Withdrawals.Kgal,
            target_nm)
   
-  Xy <- log10(Xy+0.000001) %>% filter_all(all_vars(!is.infinite(.)))
+  Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), 
+              log10(Xy + min(Xy[Xy!=0])/100)) 
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
 
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
-           map(function(target_nm) makedata_map(target_nm = target_nm,
+           map(function(target_nm) makedata_map(target_nm,
                                                 dat= dat))) %>% 
   mutate(rowdata = data %>% map_dbl(nrow)) %>% 
   filter(rowdata > 100) %>% 
   select(-rowdata) %>% 
   mutate(top_model = data %>% 
-           map(function(data) bestglm::bestglm(Xy=data, family = gaussian, method = "exhaustive", IC = "BIC", TopModels = 1))) %>% 
+           map(function(data) bestglm::bestglm(Xy=data %>% select_if(is.numeric), family = gaussian, method = "exhaustive", IC = "BIC", TopModels = 1))) %>% 
   mutate(best_model = top_model %>% map(function(top_model) top_model[[1]])) %>% 
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
@@ -105,11 +101,24 @@ plot(good_lm$best_model[[3]], which=1:6)
 plot(good_lm$best_model[[4]], which=1:6)
 dev.off()
 
-
-plot(log(dat$CO.t), log10(dat$Coal.TJ))
-
-plot(dat$Sector %>% as.factor(), log10(dat$PM2.5.t))
-plot(dat$Sector %>% as.factor(), log10(dat$CO2.Fossil.t.CO2e))
-
-# PM2.5.t: Emissions of Particulate Matter (less than 2.5 microns in diameter) to Air from each sector. Value is Primary PM. t = meric tons 
+# descriptive analysis
+good_lm$target
+# NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
+# SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
+# Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
 # CO2.Fossil.t.CO2e	C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
+
+par(mfrow=c(1,2))
+plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
+plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
+
+plot(good_lm$data[[2]][,ncol(good_lm$data[[2]])])
+plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
+
+plot(good_lm$data[[3]][,ncol(good_lm$data[[3]])])
+plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
+
+plot(good_lm$data[[4]][,ncol(good_lm$data[[4]])])
+plot(good_lm$data[[4]][,1], good_lm$data[[4]][,ncol(good_lm$data[[4]])])
+dev.off()
+

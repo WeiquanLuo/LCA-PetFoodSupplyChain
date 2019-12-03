@@ -11,9 +11,8 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 colnames(dat)
 
 # outlier removal
-dat[which(dat$X %in% c(16,78)),]
-
-#dat <- dat[-which(dat$X %in% c(16,78)),]
+#dat[which(dat$X %in% c(16, 78, 88)),]
+#dat <- dat[-which(dat$X %in% c(16, 78, 88)),]
 dat$X
 dat %>% tibble()
 
@@ -37,7 +36,7 @@ makedata_map <- function(target_nm, dat){
            Water.Withdrawals.Kgal,
            target_nm)
   
-  Xy <- log10(Xy) %>% filter_all(all_vars(!is.infinite(.)))
+  Xy <- log10(Xy+0.000001) %>% filter_all(all_vars(!is.infinite(.)))
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
@@ -104,9 +103,6 @@ plot(good_lm$best_model[[1]], which=1:6)
 plot(good_lm$best_model[[2]], which=1:6)
 plot(good_lm$best_model[[3]], which=1:6)
 plot(good_lm$best_model[[4]], which=1:6)
-plot(good_lm$best_model[[5]], which=1:6)
-plot(good_lm$best_model[[6]], which=1:6)
-plot(good_lm$best_model[[7]], which=1:6)
 dev.off()
 
 

@@ -93,6 +93,8 @@ coef_list # result of coef placeholder
 signif_list # result of signif of coefs placeholder
 coef_signif_list # aggregation view of coef and signif
 
+save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
+
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[1]], which=1:6)

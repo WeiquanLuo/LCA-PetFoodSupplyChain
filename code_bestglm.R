@@ -30,9 +30,10 @@ makedata_map <- function(target_nm, dat){
            Bio.Waste.TJ, NonFossElec.TJ, 
            Water.Withdrawals.Kgal,
            target_nm)
-  
-  Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), 
-              log10(Xy + min(Xy[Xy!=0])/100)) 
+  # retin all inf by log(x + min/100)
+  #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
+  # remove all inf= log(0)
+  Xy <- log10(Xy) %>% filter_all(all_vars(!is.infinite(.)))
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
@@ -93,7 +94,7 @@ coef_list # result of coef placeholder
 signif_list # result of signif of coefs placeholder
 coef_signif_list # aggregation view of coef and signif
 
-save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
+#save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
 
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm
 par(mfrow=c(2,3))
@@ -101,6 +102,10 @@ plot(good_lm$best_model[[1]], which=1:6)
 plot(good_lm$best_model[[2]], which=1:6)
 plot(good_lm$best_model[[3]], which=1:6)
 plot(good_lm$best_model[[4]], which=1:6)
+plot(good_lm$best_model[[5]], which=1:6)
+plot(good_lm$best_model[[6]], which=1:6)
+plot(good_lm$best_model[[7]], which=1:6)
+
 dev.off()
 
 # descriptive analysis

@@ -19,6 +19,7 @@ environmental impact. The study aim to answer the following questions:
   - which industry(s) have larger impact among all industries?
   - what are the relationship between some impact relative to the input
     (ie. Energy, water withdraw)?
+  - how the outlier industry(s) behave in linear regression models
 
 ## Hightlight
 
@@ -168,9 +169,10 @@ makedata_map <- function(target_nm, dat){
            Bio.Waste.TJ, NonFossElec.TJ, 
            Water.Withdrawals.Kgal,
            target_nm)
-  
-  Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), 
-              log10(Xy + min(Xy[Xy!=0])/100)) 
+  # retin all inf by log(x + min/100)
+  #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
+  # remove all inf= log(0)
+  Xy <- log10(Xy) %>% filter_all(all_vars(!is.infinite(.)))
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
@@ -350,43 +352,31 @@ CO.t
 
 <td style="text-align:right;">
 
-0.7330828
+0.7511409
 
 </td>
 
 <td style="text-align:right;">
 
-0.7310708
+0.7476604
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-7.12(\*\*\*)
+\-0.412(\*)
 
 </td>
 
 <td style="text-align:left;">
 
-\-0.177(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.175(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.478(\*\*\*)
+0.275(\*\*\*)
 
 </td>
 
@@ -396,13 +386,19 @@ CO.t
 
 <td style="text-align:left;">
 
-0.21(\*\*\*)
+0.676(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-\-0.174(\*\*)
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
@@ -418,31 +414,25 @@ NH3.t
 
 <td style="text-align:right;">
 
-0.5551474
+0.7683303
 
 </td>
 
 <td style="text-align:right;">
 
-0.5517942
+0.7642299
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-0.55(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.125(\*\*\*)
+2.3(\*\*\*)
 
 </td>
 
@@ -452,17 +442,23 @@ NH3.t
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
-
-0.517(\*\*\*)
+0.141(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.461(\*\*\*)
+0.68(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.195(\*\*\*)
 
 </td>
 
@@ -482,25 +478,25 @@ NOx.t
 
 <td style="text-align:right;">
 
-0.8127220
+0.9117863
 
 </td>
 
 <td style="text-align:right;">
 
-0.8113103
+0.9099226
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-2.19(\*\*\*)
+1.47(\*\*\*)
 
 </td>
 
@@ -514,25 +510,19 @@ NOx.t
 
 <td style="text-align:left;">
 
-0.119(\*\*\*)
+</td>
+
+<td style="text-align:left;">
+
+1.1(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.512(\*\*\*)
-
 </td>
 
 <td style="text-align:left;">
-
-0.292(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.142(\*\*\*)
 
 </td>
 
@@ -548,25 +538,25 @@ PM10.t
 
 <td style="text-align:right;">
 
-0.6976157
+0.8891458
 
 </td>
 
 <td style="text-align:right;">
 
-0.6953364
+0.8860010
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-7.01(\*\*\*)
+0.366
 
 </td>
 
@@ -576,11 +566,11 @@ PM10.t
 
 <td style="text-align:left;">
 
+0.847(\*\*\*)
+
 </td>
 
 <td style="text-align:left;">
-
-0.187(\*\*\*)
 
 </td>
 
@@ -608,37 +598,31 @@ PM2.5.t
 
 <td style="text-align:right;">
 
-0.6639711
+0.8781678
 
 </td>
 
 <td style="text-align:right;">
 
-0.6614382
+0.8745845
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-1.74(\*\*\*)
+\-1.9(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.767(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.227(\*\*\*)
+0.237(\*\*)
 
 </td>
 
@@ -648,13 +632,15 @@ PM2.5.t
 
 <td style="text-align:left;">
 
-0.531(\*\*\*)
+0.725(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-\-0.41(\*\*\*)
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
@@ -674,25 +660,43 @@ SO2.t
 
 <td style="text-align:right;">
 
-0.7853989
+0.9283235
 
 </td>
 
 <td style="text-align:right;">
 
-0.7832367
+0.9267985
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-7.59(\*\*\*)
+\-0.33(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.18(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.172(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.636(\*\*\*)
 
 </td>
 
@@ -701,22 +705,6 @@ SO2.t
 </td>
 
 <td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.187(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.0906(\*\*)
 
 </td>
 
@@ -736,47 +724,43 @@ VOC.t
 
 <td style="text-align:right;">
 
-0.5833390
+0.6905785
 
 </td>
 
 <td style="text-align:right;">
 
-0.5801984
+0.6862205
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-0.276
+1.19(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.58(\*\*\*)
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
 <td style="text-align:left;">
 
-0.229(\*\*\*)
-
 </td>
 
 <td style="text-align:left;">
 
-0.281(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
+1.07(\*\*\*)
 
 </td>
 
@@ -800,51 +784,53 @@ Total.t.CO2e
 
 <td style="text-align:right;">
 
-0.8864414
+0.9828135
 
 </td>
 
 <td style="text-align:right;">
 
-0.8852972
+0.9823259
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-1.9(\*\*\*)
+\-0.693(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.2(\*\*\*)
+0.244(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
+0.334(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.317(\*\*\*)
+0.573(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.399(\*\*\*)
+\-0.229(\*)
+
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
@@ -864,243 +850,53 @@ CO2.Fossil.t.CO2e
 
 <td style="text-align:right;">
 
-0.8897299
+0.9910351
 
 </td>
 
 <td style="text-align:right;">
 
-0.8886189
+0.9908457
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-0.402(\*\*)
+\-1.08(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.132(\*\*\*)
+0.262(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
+0.237(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.496(\*\*\*)
+0.658(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.462(\*\*\*)
+\-0.252(\*)
 
 </td>
 
 <td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CO2.Process.t.CO2e
-
-</td>
-
-<td style="text-align:right;">
-
-0.0554757
-
-</td>
-
-<td style="text-align:right;">
-
-0.0531144
-
-</td>
-
-<td style="text-align:right;">
-
-1.80e-06
-
-</td>
-
-<td style="text-align:left;">
-
-0.56
-
-</td>
-
-<td style="text-align:left;">
-
-0.69(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.544(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.246(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CH4.t.CO2e
-
-</td>
-
-<td style="text-align:right;">
-
-0.1769380
-
-</td>
-
-<td style="text-align:right;">
-
-0.1665458
-
-</td>
-
-<td style="text-align:right;">
-
-0.00e+00
-
-</td>
-
-<td style="text-align:left;">
-
-0.0321
-
-</td>
-
-<td style="text-align:left;">
-
-0.208(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.295(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.584(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-HFC.PFCs.t.CO2e
-
-</td>
-
-<td style="text-align:right;">
-
-0.0454860
-
-</td>
-
-<td style="text-align:right;">
-
-0.0407015
-
-</td>
-
-<td style="text-align:right;">
-
-9.26e-05
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.338
-
-</td>
-
-<td style="text-align:left;">
-
-0.248(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.265(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.545(\*\*\*)
 
 </td>
 
@@ -1120,37 +916,25 @@ Fugitive.kg
 
 <td style="text-align:right;">
 
-0.5721880
+0.6404521
 
 </td>
 
 <td style="text-align:right;">
 
-0.5678776
+0.6378467
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-2.39(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.414(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.177(\*\*)
+\-1(\*\*)
 
 </td>
 
@@ -1160,13 +944,19 @@ Fugitive.kg
 
 <td style="text-align:left;">
 
-0.406(\*\*\*)
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
 <td style="text-align:left;">
 
-\-0.261(\*\*\*)
+0.89(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
@@ -1186,37 +976,25 @@ Stack.kg
 
 <td style="text-align:right;">
 
-0.5595776
+0.5949768
 
 </td>
 
 <td style="text-align:right;">
 
-0.5551401
+0.5920418
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-0.745(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.162(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.18(\*\*\*)
+0.41(\*\*\*)
 
 </td>
 
@@ -1226,13 +1004,23 @@ Stack.kg
 
 <td style="text-align:left;">
 
-0.278(\*\*\*)
+0.533(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.536(\*\*\*)
+0.166(\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.35(\*\*\*)
 
 </td>
 
@@ -1252,43 +1040,25 @@ Total.Air.kg
 
 <td style="text-align:right;">
 
-0.5735031
+0.6697148
 
 </td>
 
 <td style="text-align:right;">
 
-0.5692059
+0.6649625
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-1.92(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.828(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.169(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.393(\*\*\*)
+2.26(\*\*\*)
 
 </td>
 
@@ -1298,7 +1068,19 @@ Total.Air.kg
 
 <td style="text-align:left;">
 
-\-0.325(\*\*\*)
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+1.23(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
 
 </td>
 
@@ -1318,47 +1100,25 @@ Surface.water.kg
 
 <td style="text-align:right;">
 
-0.4861662
+0.6229475
 
 </td>
 
 <td style="text-align:right;">
 
-0.4822931
+0.6194563
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-0.42
-
-</td>
-
-<td style="text-align:left;">
-
-0.641(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.239(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.269(\*\*\*)
+1.29(\*\*\*)
 
 </td>
 
@@ -1370,49 +1130,9 @@ Surface.water.kg
 
 </td>
 
-</tr>
-
-<tr>
-
 <td style="text-align:left;">
 
-U\_ground.Water.kg
-
-</td>
-
-<td style="text-align:right;">
-
-0.1408868
-
-</td>
-
-<td style="text-align:right;">
-
-0.1365805
-
-</td>
-
-<td style="text-align:right;">
-
-0.00e+00
-
-</td>
-
-<td style="text-align:left;">
-
-2.65(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.832(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.262(\*\*\*)
+1.5(\*\*\*)
 
 </td>
 
@@ -1421,14 +1141,6 @@ U\_ground.Water.kg
 </td>
 
 <td style="text-align:left;">
-
-0.527(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.454(\*\*\*)
 
 </td>
 
@@ -1448,25 +1160,25 @@ Land.kg
 
 <td style="text-align:right;">
 
-0.4512091
+0.4658109
 
 </td>
 
 <td style="text-align:right;">
 
-0.4470725
+0.4611250
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-2.4(\*\*\*)
+2.45(\*\*\*)
 
 </td>
 
@@ -1480,25 +1192,21 @@ Land.kg
 
 <td style="text-align:left;">
 
-0.122(\*\*\*)
+</td>
+
+<td style="text-align:left;">
+
+0.9(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.542(\*\*\*)
+0.249(\*\*)
 
 </td>
 
 <td style="text-align:left;">
-
-0.302(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.135(\*\*\*)
 
 </td>
 
@@ -1514,31 +1222,25 @@ Offiste.kg
 
 <td style="text-align:right;">
 
-0.4594006
+0.4845963
 
 </td>
 
 <td style="text-align:right;">
 
-0.4553257
+0.4806316
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-5.18(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.248(\*\*\*)
+2.52(\*\*\*)
 
 </td>
 
@@ -1548,6 +1250,14 @@ Offiste.kg
 
 <td style="text-align:left;">
 
+0.165(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.707(\*\*\*)
+
 </td>
 
 <td style="text-align:left;">
@@ -1556,11 +1266,13 @@ Offiste.kg
 
 <td style="text-align:left;">
 
-0.172(\*\*\*)
+0.204(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
+
+\-0.0377(\*)
 
 </td>
 
@@ -1576,31 +1288,31 @@ POTW.Metal.kg
 
 <td style="text-align:right;">
 
-0.3692912
+0.4867847
 
 </td>
 
 <td style="text-align:right;">
 
-0.3629365
+0.4817033
 
 </td>
 
 <td style="text-align:right;">
 
-0.00e+00
+0
 
 </td>
 
 <td style="text-align:left;">
 
-\-0.255
+\-0.447(\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.198(\*\*\*)
+0.215(\*\*)
 
 </td>
 
@@ -1614,13 +1326,11 @@ POTW.Metal.kg
 
 <td style="text-align:left;">
 
-0.524(\*\*\*)
+0.755(\*\*\*)
 
 </td>
 
 <td style="text-align:left;">
-
-0.251(\*\*\*)
 
 </td>
 
@@ -1636,42 +1346,68 @@ POTW.Metal.kg
 
 # Communciate and visualize the results
 
+## The linear model with R^2 \>0.75
+
+``` r
+good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm %>% arrange(desc(adj.r.squared))
+#> # A tibble: 7 x 16
+#>   target data  top_model best_model anv   r.squared adj.r.squared sigma
+#>   <chr>  <lis> <list>    <list>     <lis>     <dbl>         <dbl> <dbl>
+#> 1 CO2.F… <df[… <bestglm> <lm>       <df[…     0.991         0.991 0.106
+#> 2 Total… <df[… <bestglm> <lm>       <df[…     0.983         0.982 0.151
+#> 3 SO2.t  <df[… <bestglm> <lm>       <df[…     0.928         0.927 0.349
+#> 4 NOx.t  <df[… <bestglm> <lm>       <df[…     0.912         0.910 0.336
+#> 5 PM10.t <df[… <bestglm> <lm>       <df[…     0.889         0.886 0.384
+#> 6 PM2.5… <df[… <bestglm> <lm>       <df[…     0.878         0.875 0.390
+#> 7 NH3.t  <df[… <bestglm> <lm>       <df[…     0.768         0.764 0.524
+#> # … with 8 more variables: statistic <dbl>, p.value <dbl>, df <int>,
+#> #   logLik <dbl>, AIC <dbl>, BIC <dbl>, deviance <dbl>, df.residual <int>
+```
+
 ## The diagnosis of linear model
 
 ``` r
-good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm
-#> # A tibble: 4 x 16
-#>   target data  top_model best_model anv   r.squared adj.r.squared sigma
-#>   <chr>  <lis> <list>    <list>     <lis>     <dbl>         <dbl> <dbl>
-#> 1 NOx.t  <df[… <bestglm> <lm>       <df[…     0.813         0.811 0.803
-#> 2 SO2.t  <df[… <bestglm> <lm>       <df[…     0.785         0.783 0.944
-#> 3 Total… <df[… <bestglm> <lm>       <df[…     0.886         0.885 0.620
-#> 4 CO2.F… <df[… <bestglm> <lm>       <df[…     0.890         0.889 0.592
-#> # … with 8 more variables: statistic <dbl>, p.value <dbl>, df <int>,
-#> #   logLik <dbl>, AIC <dbl>, BIC <dbl>, deviance <dbl>, df.residual <int>
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[1]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-2.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[3]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-3.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[4]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-4.png" width="100%" />
+
+``` r
+plot(good_lm$best_model[[5]], which=1:6)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-5.png" width="100%" />
+
+``` r
+plot(good_lm$best_model[[6]], which=1:6)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-6.png" width="100%" />
+
+``` r
+plot(good_lm$best_model[[7]], which=1:6)
+```
+
+<img src="man/figures/README-unnamed-chunk-9-7.png" width="100%" />
 
 # Result
 
@@ -1680,8 +1416,9 @@ plot(good_lm$best_model[[4]], which=1:6)
 ``` r
 # descriptive analysis
 good_lm$target
-#> [1] "NOx.t"             "SO2.t"             "Total.t.CO2e"     
-#> [4] "CO2.Fossil.t.CO2e"
+#> [1] "NH3.t"             "NOx.t"             "PM10.t"           
+#> [4] "PM2.5.t"           "SO2.t"             "Total.t.CO2e"     
+#> [7] "CO2.Fossil.t.CO2e"
 # NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
 # SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
 # Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
@@ -1692,7 +1429,7 @@ plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 ``` r
 
@@ -1700,7 +1437,7 @@ plot(good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
 
 ``` r
 
@@ -1708,7 +1445,7 @@ plot(good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
 
 ``` r
 
@@ -1716,4 +1453,4 @@ plot(good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 plot(good_lm$data[[4]][,1], good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-4.png" width="100%" />

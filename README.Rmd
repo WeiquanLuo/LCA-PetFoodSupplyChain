@@ -95,9 +95,10 @@ makedata_map <- function(target_nm, dat){
            Bio.Waste.TJ, NonFossElec.TJ, 
            Water.Withdrawals.Kgal,
            target_nm)
-  
-  Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), 
-              log10(Xy + min(Xy[Xy!=0])/100)) 
+  # retin all inf by log(x + min/100)
+  #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
+  # remove all inf= log(0)
+  Xy <- log10(Xy) %>% filter_all(all_vars(!is.infinite(.)))
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
@@ -167,14 +168,21 @@ knitr::kable(coef_signif_list)
 
 # Communciate and visualize the results
 
+## The linear model with R^2 >0.75
+```{r}
+good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm %>% arrange(desc(adj.r.squared))
+```
+
 ## The diagnosis of linear model
 ```{r}
-good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[1]], which=1:6)
 plot(good_lm$best_model[[2]], which=1:6)
 plot(good_lm$best_model[[3]], which=1:6)
 plot(good_lm$best_model[[4]], which=1:6)
+plot(good_lm$best_model[[5]], which=1:6)
+plot(good_lm$best_model[[6]], which=1:6)
+plot(good_lm$best_model[[7]], which=1:6)
 ```
 
 # Result

@@ -22,6 +22,22 @@ environmental impact. The study aim to answer the following questions:
 
 ## Hightlight
 
+1.  for dog and cat food Manufacturing, the greatest environmental
+    impacts come frome any raw material production industries such as
+    agricultural farming.
+
+2.  we successfully fit linear regression model on the following
+    environmental impact using energy and water withdraw as input:
+
+<!-- end list -->
+
+  - Emissions of Nitrogen Oxides to Air,
+  - Emissions of Sulfur Dioxide to Air,
+  - weighting of greenhouse gas emissions into the air from the
+    production,
+  - Emissions of Carbon Dioxide (CO2) into the air from fossil fuel
+    combus.
+
 ## Workflow
 
 <center>
@@ -47,6 +63,9 @@ getting the LCA data is US 2002 producer price benchmark.
 
 # Explore the data
 
+After webscaping, combinding the raw data, and manually making minor
+modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
+
 ``` r
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
@@ -54,11 +73,29 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 # Input columns 
 X <- dat %>% 
   select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
+psych::describe(X)
+#>                        vars   n   mean      sd median trimmed  mad min
+#> Coal.TJ                   1 402   0.01    0.12   0.00    0.00 0.00   0
+#> NatGase.TJ                2 402   0.01    0.08   0.00    0.00 0.00   0
+#> Petrol.TJ                 3 402   0.01    0.07   0.00    0.00 0.00   0
+#> Bio.Waste.TJ              4 402   0.00    0.01   0.00    0.00 0.00   0
+#> NonFossElec.TJ            5 402   0.00    0.03   0.00    0.00 0.00   0
+#> Water.Withdrawals.Kgal    6 402 446.14 7894.36   0.04    0.53 0.06   0
+#>                              max     range  skew kurtosis     se
+#> Coal.TJ                     2.32      2.32 19.34   379.42   0.01
+#> NatGase.TJ                  1.37      1.37 13.88   217.66   0.00
+#> Petrol.TJ                   1.09      1.09 13.11   195.82   0.00
+#> Bio.Waste.TJ                0.18      0.18 10.27   114.44   0.00
+#> NonFossElec.TJ              0.42      0.42 13.11   200.38   0.00
+#> Water.Withdrawals.Kgal 158030.55 158030.55 19.79   391.97 393.73
+```
+
+``` r
 M <- cor(X)
 corrplot::corrplot(M, method="color")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
 ``` r
 # target columns 
@@ -66,9 +103,52 @@ CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 ys <- cbind(CPA, GHG, TOX)
+psych::describe(ys)
+#>                    vars   n mean    sd median trimmed  mad min    max
+#> CO.t                  1 402 0.02  0.30   0.00    0.00 0.00   0   5.89
+#> NH3.t                 2 402 0.01  0.14   0.00    0.00 0.00   0   2.69
+#> NOx.t                 3 402 0.01  0.05   0.00    0.00 0.00   0   0.71
+#> PM10.t                4 402 0.02  0.29   0.00    0.00 0.00   0   5.70
+#> PM2.5.t               5 402 0.00  0.07   0.00    0.00 0.00   0   1.38
+#> SO2.t                 6 402 0.01  0.06   0.00    0.00 0.00   0   1.08
+#> VOC.t                 7 402 0.00  0.04   0.00    0.00 0.00   0   0.72
+#> Total.t.CO2e          8 402 3.82 30.77   0.02    0.12 0.03   0 512.17
+#> CO2.Fossil.t.CO2e     9 402 1.83 14.41   0.02    0.09 0.02   0 257.56
+#> CO2.Process.t.CO2e   10 402 0.12  1.30   0.00    0.00 0.00   0  18.93
+#> CH4.t.CO2e           11 402 0.55  5.90   0.00    0.00 0.00   0 108.46
+#> HFC.PFCs.t.CO2e      12 402 0.02  0.25   0.00    0.00 0.00   0   4.16
+#> Fugitive.kg          13 402 0.12  0.92   0.00    0.00 0.00   0  12.19
+#> Stack.kg             14 402 0.42  2.73   0.00    0.01 0.00   0  33.32
+#> Total.Air.kg         15 402 0.54  3.45   0.00    0.01 0.00   0  37.09
+#> Surface.water.kg     16 402 0.13  1.06   0.00    0.00 0.00   0  16.40
+#> U_ground.Water.kg    17 402 0.06  0.56   0.00    0.00 0.00   0   8.84
+#> Land.kg              18 402 0.30  3.28   0.00    0.00 0.00   0  59.73
+#> Offiste.kg           19 402 0.12  0.99   0.00    0.00 0.00   0  18.39
+#> POTW.Metal.kg        20 402 0.00  0.00   0.00    0.00 0.00   0   0.04
+#>                     range  skew kurtosis   se
+#> CO.t                 5.89 19.52   384.80 0.01
+#> NH3.t                2.69 18.08   341.44 0.01
+#> NOx.t                0.71  9.98   106.60 0.00
+#> PM10.t               5.70 19.67   388.60 0.01
+#> PM2.5.t              1.38 19.45   382.60 0.00
+#> SO2.t                1.08 17.91   339.19 0.00
+#> VOC.t                0.72 15.18   251.89 0.00
+#> Total.t.CO2e       512.17 13.30   198.04 1.53
+#> CO2.Fossil.t.CO2e  257.56 14.83   248.47 0.72
+#> CO2.Process.t.CO2e  18.93 12.41   160.89 0.06
+#> CH4.t.CO2e         108.46 15.92   278.75 0.29
+#> HFC.PFCs.t.CO2e      4.16 13.62   201.15 0.01
+#> Fugitive.kg         12.19 11.03   130.44 0.05
+#> Stack.kg            33.32  8.71    82.72 0.14
+#> Total.Air.kg        37.09  8.38    73.86 0.17
+#> Surface.water.kg    16.40 12.74   175.01 0.05
+#> U_ground.Water.kg    8.84 12.13   164.86 0.03
+#> Land.kg             59.73 15.78   271.04 0.16
+#> Offiste.kg          18.39 16.01   285.76 0.05
+#> POTW.Metal.kg        0.04  7.48    61.88 0.00
 ```
 
-# Model the data
+# Fit Models
 
 ## user-define function
 
@@ -99,7 +179,7 @@ bind_coef_star <- function(x) {
 }
 ```
 
-## Lienar RegressionModeling with log10 transformation
+## Linear Regression Modeling with log10 Transformation on Input and Output
 
 ``` r
 # create a dataframe with a column with impact variable names 
@@ -1574,35 +1654,46 @@ par(mfrow=c(2,3))
 plot(good_lm$best_model[[1]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[3]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
 
 ``` r
 plot(good_lm$best_model[[4]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
 
-# impact between Sector
+# Result
+
+## Impact between Sector
 
 ``` r
+# descriptive analysis
+good_lm$target
+#> [1] "NOx.t"             "SO2.t"             "Total.t.CO2e"     
+#> [4] "CO2.Fossil.t.CO2e"
+# NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
+# SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
+# Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
+# CO2.Fossil.t.CO2e C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
+
 par(mfrow=c(1,2))
 plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
 ``` r
 
@@ -1610,7 +1701,7 @@ plot(good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-2.png" width="100%" />
 
 ``` r
 
@@ -1618,7 +1709,7 @@ plot(good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-3.png" width="100%" />
 
 ``` r
 
@@ -1626,4 +1717,4 @@ plot(good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 plot(good_lm$data[[4]][,1], good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-4.png" width="100%" />

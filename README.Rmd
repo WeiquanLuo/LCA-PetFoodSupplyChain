@@ -23,6 +23,16 @@ The goal of this project is to study the environmental impact of a certain amoun
 
 ## Hightlight
 
+
+1. for dog and cat food Manufacturing, the greatest environmental impacts come frome any raw material production industries such as agricultural farming.
+
+2. we successfully fit linear regression model on the following environmental impact using energy and water withdraw as input:
+
+* Emissions of Nitrogen Oxides to Air,
+* Emissions of Sulfur Dioxide to Air,
+* weighting of greenhouse gas emissions into the air from the production,
+* Emissions of Carbon Dioxide (CO2) into the air from fossil fuel combus.
+
 ## Workflow
 
 <center>
@@ -40,6 +50,9 @@ library(purrr)
 ```
 
 # Explore the data
+
+After webscaping, combinding the raw data, and manually making minor modification, we result a datafarme stored as 'dat_311111_1M_v2.csv.
+ 
 ```{r}
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
@@ -47,6 +60,11 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 # Input columns 
 X <- dat %>% 
   select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
+psych::describe(X)
+
+```
+
+```{r}
 M <- cor(X)
 corrplot::corrplot(M, method="color")
 ```
@@ -58,9 +76,10 @@ CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 ys <- cbind(CPA, GHG, TOX)
+psych::describe(ys)
 ```
 
-# Model the data
+# Fit Models
 
 ## user-define function
 ```{r}
@@ -90,7 +109,7 @@ bind_coef_star <- function(x) {
 }
 ```
 
-## Lienar RegressionModeling with log10 transformation
+## Linear Regression Modeling with log10 Transformation on Input and Output
 ```{r}
 # create a dataframe with a column with impact variable names 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list
@@ -157,9 +176,17 @@ plot(good_lm$best_model[[3]], which=1:6)
 plot(good_lm$best_model[[4]], which=1:6)
 ```
 
-# impact between Sector 
+# Result
+## Impact between Sector 
 
 ```{r}
+# descriptive analysis
+good_lm$target
+# NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
+# SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
+# Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
+# CO2.Fossil.t.CO2e	C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
+
 par(mfrow=c(1,2))
 plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])

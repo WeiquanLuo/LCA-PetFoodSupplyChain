@@ -47,6 +47,7 @@ The dataset for this project is the first pass life cycle assessment results for
 ```{r include=FALSE, }
 library(dplyr)
 library(purrr)
+library(kableExtra)
 ```
 
 # Explore the data
@@ -158,9 +159,6 @@ coef_signif_list <- bestglm_list %>%
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
 # result
-
-library(dplyr)
-library(kableExtra)
 knitr::kable(coef_signif_list)
 ```
 

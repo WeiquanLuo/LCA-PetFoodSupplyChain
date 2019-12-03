@@ -252,14 +252,6 @@ coef_signif_list <- bestglm_list %>%
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
 # result
-
-library(dplyr)
-library(kableExtra)
-#> 
-#> Attaching package: 'kableExtra'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     group_rows
 knitr::kable(coef_signif_list)
 ```
 

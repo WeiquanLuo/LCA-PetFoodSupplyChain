@@ -33,6 +33,9 @@ The goal of this project is to study the environmental impact of a certain amoun
 * weighting of greenhouse gas emissions into the air from the production,
 * Emissions of Carbon Dioxide (CO2) into the air from fossil fuel combus.
 
+3. most of industries use either NonFossoil Eletrecity or Fossoil Eletrecity
+4. for those industries using biowaste as energy source have higher impact in toxic.
+
 ## Workflow
 
 <center>

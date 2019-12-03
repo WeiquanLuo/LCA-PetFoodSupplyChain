@@ -38,6 +38,13 @@ environmental impact. The study aim to answer the following questions:
   - Emissions of Carbon Dioxide (CO2) into the air from fossil fuel
     combus.
 
+<!-- end list -->
+
+3.  most of industries use either NonFossoil Eletrecity or Fossoil
+    Eletrecity
+4.  for those industries using biowaste as energy source have higher
+    impact in toxic.
+
 ## Workflow
 
 <center>

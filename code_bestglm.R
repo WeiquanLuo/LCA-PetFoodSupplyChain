@@ -98,6 +98,7 @@ coef_list # result of coef placeholder
 signif_list # result of signif of coefs placeholder
 coef_signif_list # aggregation view of coef and signif
 
+#coef_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE)
 #save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
 
 good_coef <- coef_signif_list %>% filter(adj.r.squared >0.75); good_coef

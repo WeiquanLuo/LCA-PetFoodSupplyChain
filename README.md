@@ -57,17 +57,22 @@ Chain](doc/LCA_%20Pet%20Food%20Supply%20Chain%20.png)
 
 # Data description
 
-What kind of data is avialble? How is your data collected? Are there any
-concerns about the data? Which data is the most relevant? Is the data
-easy to acccess? Will the data change over time? What needs to be done
-to the data to get it ready for any downstream analysis?
-
 The dataset for this project is the first pass life cycle assessment
 results for cat and dog food manufacturing. It provides the
 environmental impact information into the pet food supply chain. The LCA
 data was generated through EIO-LCA
 website(<http://www.eiolca.net/cgi-bin/dft/use.pl>). The model for
-getting the LCA data is US 2002 producer price benchmark.
+getting the LCA data is US 2002 producer price benchmark. In order to
+get the dog and cat food manufacturing LCA data, the user needs to
+select “Food beverage and tobacco” sector group, dog and cat food
+manufacturing sector and then the amount of economic activity for this
+sector(e.g. 1 millon dollars). After setting up the sector and economic
+parameters, The user could select different economical and environmental
+impact to get the LCA results. The LCA results are ready for downloading
+as excel files. The raw data was lacking the columns name for different
+impact feature and index for identifying the different sectors and
+sector group. The web scraping is necessary for the columns name and
+NAICS sector code.
 
 # Explore the data
 
@@ -112,49 +117,51 @@ GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 ys <- cbind(CPA, GHG, TOX)
 psych::describe(ys)
-#>                    vars   n mean    sd median trimmed  mad min    max
-#> CO.t                  1 402 0.02  0.30   0.00    0.00 0.00   0   5.89
-#> NH3.t                 2 402 0.01  0.14   0.00    0.00 0.00   0   2.69
-#> NOx.t                 3 402 0.01  0.05   0.00    0.00 0.00   0   0.71
-#> PM10.t                4 402 0.02  0.29   0.00    0.00 0.00   0   5.70
-#> PM2.5.t               5 402 0.00  0.07   0.00    0.00 0.00   0   1.38
-#> SO2.t                 6 402 0.01  0.06   0.00    0.00 0.00   0   1.08
-#> VOC.t                 7 402 0.00  0.04   0.00    0.00 0.00   0   0.72
-#> Total.t.CO2e          8 402 3.82 30.77   0.02    0.12 0.03   0 512.17
-#> CO2.Fossil.t.CO2e     9 402 1.83 14.41   0.02    0.09 0.02   0 257.56
-#> CO2.Process.t.CO2e   10 402 0.12  1.30   0.00    0.00 0.00   0  18.93
-#> CH4.t.CO2e           11 402 0.55  5.90   0.00    0.00 0.00   0 108.46
-#> HFC.PFCs.t.CO2e      12 402 0.02  0.25   0.00    0.00 0.00   0   4.16
-#> Fugitive.kg          13 402 0.12  0.92   0.00    0.00 0.00   0  12.19
-#> Stack.kg             14 402 0.42  2.73   0.00    0.01 0.00   0  33.32
-#> Total.Air.kg         15 402 0.54  3.45   0.00    0.01 0.00   0  37.09
-#> Surface.water.kg     16 402 0.13  1.06   0.00    0.00 0.00   0  16.40
-#> U_ground.Water.kg    17 402 0.06  0.56   0.00    0.00 0.00   0   8.84
-#> Land.kg              18 402 0.30  3.28   0.00    0.00 0.00   0  59.73
-#> Offiste.kg           19 402 0.12  0.99   0.00    0.00 0.00   0  18.39
-#> POTW.Metal.kg        20 402 0.00  0.00   0.00    0.00 0.00   0   0.04
-#>                     range  skew kurtosis   se
-#> CO.t                 5.89 19.52   384.80 0.01
-#> NH3.t                2.69 18.08   341.44 0.01
-#> NOx.t                0.71  9.98   106.60 0.00
-#> PM10.t               5.70 19.67   388.60 0.01
-#> PM2.5.t              1.38 19.45   382.60 0.00
-#> SO2.t                1.08 17.91   339.19 0.00
-#> VOC.t                0.72 15.18   251.89 0.00
-#> Total.t.CO2e       512.17 13.30   198.04 1.53
-#> CO2.Fossil.t.CO2e  257.56 14.83   248.47 0.72
-#> CO2.Process.t.CO2e  18.93 12.41   160.89 0.06
-#> CH4.t.CO2e         108.46 15.92   278.75 0.29
-#> HFC.PFCs.t.CO2e      4.16 13.62   201.15 0.01
-#> Fugitive.kg         12.19 11.03   130.44 0.05
-#> Stack.kg            33.32  8.71    82.72 0.14
-#> Total.Air.kg        37.09  8.38    73.86 0.17
-#> Surface.water.kg    16.40 12.74   175.01 0.05
-#> U_ground.Water.kg    8.84 12.13   164.86 0.03
-#> Land.kg             59.73 15.78   271.04 0.16
-#> Offiste.kg          18.39 16.01   285.76 0.05
-#> POTW.Metal.kg        0.04  7.48    61.88 0.00
+#>                    vars   n mean    sd median trimmed  mad min    max  range
+#> CO.t                  1 402 0.02  0.30   0.00    0.00 0.00   0   5.89   5.89
+#> NH3.t                 2 402 0.01  0.14   0.00    0.00 0.00   0   2.69   2.69
+#> NOx.t                 3 402 0.01  0.05   0.00    0.00 0.00   0   0.71   0.71
+#> PM10.t                4 402 0.02  0.29   0.00    0.00 0.00   0   5.70   5.70
+#> PM2.5.t               5 402 0.00  0.07   0.00    0.00 0.00   0   1.38   1.38
+#> SO2.t                 6 402 0.01  0.06   0.00    0.00 0.00   0   1.08   1.08
+#> VOC.t                 7 402 0.00  0.04   0.00    0.00 0.00   0   0.72   0.72
+#> Total.t.CO2e          8 402 3.82 30.77   0.02    0.12 0.03   0 512.17 512.17
+#> CO2.Fossil.t.CO2e     9 402 1.83 14.41   0.02    0.09 0.02   0 257.56 257.56
+#> CO2.Process.t.CO2e   10 402 0.12  1.30   0.00    0.00 0.00   0  18.93  18.93
+#> CH4.t.CO2e           11 402 0.55  5.90   0.00    0.00 0.00   0 108.46 108.46
+#> HFC.PFCs.t.CO2e      12 402 0.02  0.25   0.00    0.00 0.00   0   4.16   4.16
+#> Fugitive.kg          13 402 0.12  0.92   0.00    0.00 0.00   0  12.19  12.19
+#> Stack.kg             14 402 0.42  2.73   0.00    0.01 0.00   0  33.32  33.32
+#> Total.Air.kg         15 402 0.54  3.45   0.00    0.01 0.00   0  37.09  37.09
+#> Surface.water.kg     16 402 0.13  1.06   0.00    0.00 0.00   0  16.40  16.40
+#> U_ground.Water.kg    17 402 0.06  0.56   0.00    0.00 0.00   0   8.84   8.84
+#> Land.kg              18 402 0.30  3.28   0.00    0.00 0.00   0  59.73  59.73
+#> Offiste.kg           19 402 0.12  0.99   0.00    0.00 0.00   0  18.39  18.39
+#> POTW.Metal.kg        20 402 0.00  0.00   0.00    0.00 0.00   0   0.04   0.04
+#>                     skew kurtosis   se
+#> CO.t               19.52   384.80 0.01
+#> NH3.t              18.08   341.44 0.01
+#> NOx.t               9.98   106.60 0.00
+#> PM10.t             19.67   388.60 0.01
+#> PM2.5.t            19.45   382.60 0.00
+#> SO2.t              17.91   339.19 0.00
+#> VOC.t              15.18   251.89 0.00
+#> Total.t.CO2e       13.30   198.04 1.53
+#> CO2.Fossil.t.CO2e  14.83   248.47 0.72
+#> CO2.Process.t.CO2e 12.41   160.89 0.06
+#> CH4.t.CO2e         15.92   278.75 0.29
+#> HFC.PFCs.t.CO2e    13.62   201.15 0.01
+#> Fugitive.kg        11.03   130.44 0.05
+#> Stack.kg            8.71    82.72 0.14
+#> Total.Air.kg        8.38    73.86 0.17
+#> Surface.water.kg   12.74   175.01 0.05
+#> U_ground.Water.kg  12.13   164.86 0.03
+#> Land.kg            15.78   271.04 0.16
+#> Offiste.kg         16.01   285.76 0.05
+#> POTW.Metal.kg       7.48    61.88 0.00
 ```
+
+# Clustering for the data
 
 # Fit Models
 

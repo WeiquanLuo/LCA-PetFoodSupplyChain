@@ -62,7 +62,7 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 # Input columns 
 X <- dat %>% 
   select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
-psych::describe(X)
+psych::describe(X) %>% knitr::kable()
 ```
 
 ```{r}
@@ -77,7 +77,7 @@ CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 ys <- cbind(CPA, GHG, TOX)
-psych::describe(ys)
+psych::describe(ys) %>% knitr::kable()
 ```
 
 # Clustering for the data
@@ -157,7 +157,7 @@ coef_signif_list <- bestglm_list %>%
   select(target, r.squared, adj.r.squared, p.value) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 # result
-knitr::kable(coef_signif_list)
+coef_signif_list %>% arrange(desc(p.value)) %>% knitr::kable()
 ```
 
 # Communciate and visualize the results

@@ -85,22 +85,634 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 # Input columns 
 X <- dat %>% 
   select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
-psych::describe(X)
-#>                        vars   n   mean      sd median trimmed  mad min
-#> Coal.TJ                   1 402   0.01    0.12   0.00    0.00 0.00   0
-#> NatGase.TJ                2 402   0.01    0.08   0.00    0.00 0.00   0
-#> Petrol.TJ                 3 402   0.01    0.07   0.00    0.00 0.00   0
-#> Bio.Waste.TJ              4 402   0.00    0.01   0.00    0.00 0.00   0
-#> NonFossElec.TJ            5 402   0.00    0.03   0.00    0.00 0.00   0
-#> Water.Withdrawals.Kgal    6 402 446.14 7894.36   0.04    0.53 0.06   0
-#>                              max     range  skew kurtosis     se
-#> Coal.TJ                     2.32      2.32 19.34   379.42   0.01
-#> NatGase.TJ                  1.37      1.37 13.88   217.66   0.00
-#> Petrol.TJ                   1.09      1.09 13.11   195.82   0.00
-#> Bio.Waste.TJ                0.18      0.18 10.27   114.44   0.00
-#> NonFossElec.TJ              0.42      0.42 13.11   200.38   0.00
-#> Water.Withdrawals.Kgal 158030.55 158030.55 19.79   391.97 393.73
+psych::describe(X) %>% knitr::kable()
 ```
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+</th>
+
+<th style="text-align:right;">
+
+vars
+
+</th>
+
+<th style="text-align:right;">
+
+n
+
+</th>
+
+<th style="text-align:right;">
+
+mean
+
+</th>
+
+<th style="text-align:right;">
+
+sd
+
+</th>
+
+<th style="text-align:right;">
+
+median
+
+</th>
+
+<th style="text-align:right;">
+
+trimmed
+
+</th>
+
+<th style="text-align:right;">
+
+mad
+
+</th>
+
+<th style="text-align:right;">
+
+min
+
+</th>
+
+<th style="text-align:right;">
+
+max
+
+</th>
+
+<th style="text-align:right;">
+
+range
+
+</th>
+
+<th style="text-align:right;">
+
+skew
+
+</th>
+
+<th style="text-align:right;">
+
+kurtosis
+
+</th>
+
+<th style="text-align:right;">
+
+se
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Coal.TJ
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0076337
+
+</td>
+
+<td style="text-align:right;">
+
+0.1168583
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000010
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000344
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000015
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+2.321467e+00
+
+</td>
+
+<td style="text-align:right;">
+
+2.321467e+00
+
+</td>
+
+<td style="text-align:right;">
+
+19.34331
+
+</td>
+
+<td style="text-align:right;">
+
+379.4182
+
+</td>
+
+<td style="text-align:right;">
+
+0.0058284
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NatGase.TJ
+
+</td>
+
+<td style="text-align:right;">
+
+2
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0110593
+
+</td>
+
+<td style="text-align:right;">
+
+0.0797249
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001375
+
+</td>
+
+<td style="text-align:right;">
+
+0.0006286
+
+</td>
+
+<td style="text-align:right;">
+
+0.0002039
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.366673e+00
+
+</td>
+
+<td style="text-align:right;">
+
+1.366673e+00
+
+</td>
+
+<td style="text-align:right;">
+
+13.87669
+
+</td>
+
+<td style="text-align:right;">
+
+217.6585
+
+</td>
+
+<td style="text-align:right;">
+
+0.0039763
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Petrol.TJ
+
+</td>
+
+<td style="text-align:right;">
+
+3
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0086899
+
+</td>
+
+<td style="text-align:right;">
+
+0.0654656
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000235
+
+</td>
+
+<td style="text-align:right;">
+
+0.0003121
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000348
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.088900e+00
+
+</td>
+
+<td style="text-align:right;">
+
+1.088900e+00
+
+</td>
+
+<td style="text-align:right;">
+
+13.11028
+
+</td>
+
+<td style="text-align:right;">
+
+195.8157
+
+</td>
+
+<td style="text-align:right;">
+
+0.0032651
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Bio.Waste.TJ
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0019597
+
+</td>
+
+<td style="text-align:right;">
+
+0.0143116
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000010
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000250
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000015
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.806160e-01
+
+</td>
+
+<td style="text-align:right;">
+
+1.806160e-01
+
+</td>
+
+<td style="text-align:right;">
+
+10.26709
+
+</td>
+
+<td style="text-align:right;">
+
+114.4378
+
+</td>
+
+<td style="text-align:right;">
+
+0.0007138
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NonFossElec.TJ
+
+</td>
+
+<td style="text-align:right;">
+
+5
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0042177
+
+</td>
+
+<td style="text-align:right;">
+
+0.0251197
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001570
+
+</td>
+
+<td style="text-align:right;">
+
+0.0005038
+
+</td>
+
+<td style="text-align:right;">
+
+0.0002298
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+4.231030e-01
+
+</td>
+
+<td style="text-align:right;">
+
+4.231030e-01
+
+</td>
+
+<td style="text-align:right;">
+
+13.11334
+
+</td>
+
+<td style="text-align:right;">
+
+200.3802
+
+</td>
+
+<td style="text-align:right;">
+
+0.0012529
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Water.Withdrawals.Kgal
+
+</td>
+
+<td style="text-align:right;">
+
+6
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+446.1435342
+
+</td>
+
+<td style="text-align:right;">
+
+7894.3608174
+
+</td>
+
+<td style="text-align:right;">
+
+0.0428940
+
+</td>
+
+<td style="text-align:right;">
+
+0.5317598
+
+</td>
+
+<td style="text-align:right;">
+
+0.0630550
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.580305e+05
+
+</td>
+
+<td style="text-align:right;">
+
+1.580305e+05
+
+</td>
+
+<td style="text-align:right;">
+
+19.78841
+
+</td>
+
+<td style="text-align:right;">
+
+391.9673
+
+</td>
+
+<td style="text-align:right;">
+
+393.7349309
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 ``` r
 M <- cor(X)
@@ -115,50 +727,1866 @@ CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
 ys <- cbind(CPA, GHG, TOX)
-psych::describe(ys)
-#>                    vars   n mean    sd median trimmed  mad min    max  range
-#> CO.t                  1 402 0.02  0.30   0.00    0.00 0.00   0   5.89   5.89
-#> NH3.t                 2 402 0.01  0.14   0.00    0.00 0.00   0   2.69   2.69
-#> NOx.t                 3 402 0.01  0.05   0.00    0.00 0.00   0   0.71   0.71
-#> PM10.t                4 402 0.02  0.29   0.00    0.00 0.00   0   5.70   5.70
-#> PM2.5.t               5 402 0.00  0.07   0.00    0.00 0.00   0   1.38   1.38
-#> SO2.t                 6 402 0.01  0.06   0.00    0.00 0.00   0   1.08   1.08
-#> VOC.t                 7 402 0.00  0.04   0.00    0.00 0.00   0   0.72   0.72
-#> Total.t.CO2e          8 402 3.82 30.77   0.02    0.12 0.03   0 512.17 512.17
-#> CO2.Fossil.t.CO2e     9 402 1.83 14.41   0.02    0.09 0.02   0 257.56 257.56
-#> CO2.Process.t.CO2e   10 402 0.12  1.30   0.00    0.00 0.00   0  18.93  18.93
-#> CH4.t.CO2e           11 402 0.55  5.90   0.00    0.00 0.00   0 108.46 108.46
-#> HFC.PFCs.t.CO2e      12 402 0.02  0.25   0.00    0.00 0.00   0   4.16   4.16
-#> Fugitive.kg          13 402 0.12  0.92   0.00    0.00 0.00   0  12.19  12.19
-#> Stack.kg             14 402 0.42  2.73   0.00    0.01 0.00   0  33.32  33.32
-#> Total.Air.kg         15 402 0.54  3.45   0.00    0.01 0.00   0  37.09  37.09
-#> Surface.water.kg     16 402 0.13  1.06   0.00    0.00 0.00   0  16.40  16.40
-#> U_ground.Water.kg    17 402 0.06  0.56   0.00    0.00 0.00   0   8.84   8.84
-#> Land.kg              18 402 0.30  3.28   0.00    0.00 0.00   0  59.73  59.73
-#> Offiste.kg           19 402 0.12  0.99   0.00    0.00 0.00   0  18.39  18.39
-#> POTW.Metal.kg        20 402 0.00  0.00   0.00    0.00 0.00   0   0.04   0.04
-#>                     skew kurtosis   se
-#> CO.t               19.52   384.80 0.01
-#> NH3.t              18.08   341.44 0.01
-#> NOx.t               9.98   106.60 0.00
-#> PM10.t             19.67   388.60 0.01
-#> PM2.5.t            19.45   382.60 0.00
-#> SO2.t              17.91   339.19 0.00
-#> VOC.t              15.18   251.89 0.00
-#> Total.t.CO2e       13.30   198.04 1.53
-#> CO2.Fossil.t.CO2e  14.83   248.47 0.72
-#> CO2.Process.t.CO2e 12.41   160.89 0.06
-#> CH4.t.CO2e         15.92   278.75 0.29
-#> HFC.PFCs.t.CO2e    13.62   201.15 0.01
-#> Fugitive.kg        11.03   130.44 0.05
-#> Stack.kg            8.71    82.72 0.14
-#> Total.Air.kg        8.38    73.86 0.17
-#> Surface.water.kg   12.74   175.01 0.05
-#> U_ground.Water.kg  12.13   164.86 0.03
-#> Land.kg            15.78   271.04 0.16
-#> Offiste.kg         16.01   285.76 0.05
-#> POTW.Metal.kg       7.48    61.88 0.00
+psych::describe(ys) %>% knitr::kable()
 ```
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+</th>
+
+<th style="text-align:right;">
+
+vars
+
+</th>
+
+<th style="text-align:right;">
+
+n
+
+</th>
+
+<th style="text-align:right;">
+
+mean
+
+</th>
+
+<th style="text-align:right;">
+
+sd
+
+</th>
+
+<th style="text-align:right;">
+
+median
+
+</th>
+
+<th style="text-align:right;">
+
+trimmed
+
+</th>
+
+<th style="text-align:right;">
+
+mad
+
+</th>
+
+<th style="text-align:right;">
+
+min
+
+</th>
+
+<th style="text-align:right;">
+
+max
+
+</th>
+
+<th style="text-align:right;">
+
+range
+
+</th>
+
+<th style="text-align:right;">
+
+skew
+
+</th>
+
+<th style="text-align:right;">
+
+kurtosis
+
+</th>
+
+<th style="text-align:right;">
+
+se
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+CO.t
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0222147
+
+</td>
+
+<td style="text-align:right;">
+
+0.2952078
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000385
+
+</td>
+
+<td style="text-align:right;">
+
+0.0006645
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000571
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+5.888105
+
+</td>
+
+<td style="text-align:right;">
+
+5.888105
+
+</td>
+
+<td style="text-align:right;">
+
+19.523839
+
+</td>
+
+<td style="text-align:right;">
+
+384.79885
+
+</td>
+
+<td style="text-align:right;">
+
+0.0147236
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NH3.t
+
+</td>
+
+<td style="text-align:right;">
+
+2
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0098300
+
+</td>
+
+<td style="text-align:right;">
+
+0.1389211
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000010
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000086
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000015
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+2.687352
+
+</td>
+
+<td style="text-align:right;">
+
+2.687352
+
+</td>
+
+<td style="text-align:right;">
+
+18.084851
+
+</td>
+
+<td style="text-align:right;">
+
+341.44049
+
+</td>
+
+<td style="text-align:right;">
+
+0.0069288
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NOx.t
+
+</td>
+
+<td style="text-align:right;">
+
+3
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0080359
+
+</td>
+
+<td style="text-align:right;">
+
+0.0540448
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000280
+
+</td>
+
+<td style="text-align:right;">
+
+0.0003363
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000415
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+0.707607
+
+</td>
+
+<td style="text-align:right;">
+
+0.707607
+
+</td>
+
+<td style="text-align:right;">
+
+9.977676
+
+</td>
+
+<td style="text-align:right;">
+
+106.60356
+
+</td>
+
+<td style="text-align:right;">
+
+0.0026955
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+PM10.t
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0177165
+
+</td>
+
+<td style="text-align:right;">
+
+0.2850504
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000055
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001408
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000082
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+5.695606
+
+</td>
+
+<td style="text-align:right;">
+
+5.695606
+
+</td>
+
+<td style="text-align:right;">
+
+19.666983
+
+</td>
+
+<td style="text-align:right;">
+
+388.60310
+
+</td>
+
+<td style="text-align:right;">
+
+0.0142170
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+PM2.5.t
+
+</td>
+
+<td style="text-align:right;">
+
+5
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0047236
+
+</td>
+
+<td style="text-align:right;">
+
+0.0694547
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000040
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000720
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000059
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.382822
+
+</td>
+
+<td style="text-align:right;">
+
+1.382822
+
+</td>
+
+<td style="text-align:right;">
+
+19.453251
+
+</td>
+
+<td style="text-align:right;">
+
+382.59517
+
+</td>
+
+<td style="text-align:right;">
+
+0.0034641
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SO2.t
+
+</td>
+
+<td style="text-align:right;">
+
+6
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0057112
+
+</td>
+
+<td style="text-align:right;">
+
+0.0559066
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000140
+
+</td>
+
+<td style="text-align:right;">
+
+0.0002277
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000208
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.082028
+
+</td>
+
+<td style="text-align:right;">
+
+1.082028
+
+</td>
+
+<td style="text-align:right;">
+
+17.908593
+
+</td>
+
+<td style="text-align:right;">
+
+339.19226
+
+</td>
+
+<td style="text-align:right;">
+
+0.0027884
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+VOC.t
+
+</td>
+
+<td style="text-align:right;">
+
+7
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0047379
+
+</td>
+
+<td style="text-align:right;">
+
+0.0406288
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000225
+
+</td>
+
+<td style="text-align:right;">
+
+0.0002173
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000334
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+0.723802
+
+</td>
+
+<td style="text-align:right;">
+
+0.723802
+
+</td>
+
+<td style="text-align:right;">
+
+15.184308
+
+</td>
+
+<td style="text-align:right;">
+
+251.89230
+
+</td>
+
+<td style="text-align:right;">
+
+0.0020264
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Total.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+8
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+3.8162115
+
+</td>
+
+<td style="text-align:right;">
+
+30.7723669
+
+</td>
+
+<td style="text-align:right;">
+
+0.0171445
+
+</td>
+
+<td style="text-align:right;">
+
+0.1191106
+
+</td>
+
+<td style="text-align:right;">
+
+0.0251975
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+512.173950
+
+</td>
+
+<td style="text-align:right;">
+
+512.173950
+
+</td>
+
+<td style="text-align:right;">
+
+13.299869
+
+</td>
+
+<td style="text-align:right;">
+
+198.03556
+
+</td>
+
+<td style="text-align:right;">
+
+1.5347862
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+CO2.Fossil.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+9
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+1.8345859
+
+</td>
+
+<td style="text-align:right;">
+
+14.4120956
+
+</td>
+
+<td style="text-align:right;">
+
+0.0169625
+
+</td>
+
+<td style="text-align:right;">
+
+0.0901948
+
+</td>
+
+<td style="text-align:right;">
+
+0.0249277
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+257.559803
+
+</td>
+
+<td style="text-align:right;">
+
+257.559803
+
+</td>
+
+<td style="text-align:right;">
+
+14.832228
+
+</td>
+
+<td style="text-align:right;">
+
+248.47182
+
+</td>
+
+<td style="text-align:right;">
+
+0.7188100
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+CO2.Process.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+10
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.1249104
+
+</td>
+
+<td style="text-align:right;">
+
+1.3012894
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+18.929557
+
+</td>
+
+<td style="text-align:right;">
+
+18.929557
+
+</td>
+
+<td style="text-align:right;">
+
+12.407185
+
+</td>
+
+<td style="text-align:right;">
+
+160.89258
+
+</td>
+
+<td style="text-align:right;">
+
+0.0649024
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+CH4.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+11
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.5452572
+
+</td>
+
+<td style="text-align:right;">
+
+5.9006979
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+108.460987
+
+</td>
+
+<td style="text-align:right;">
+
+108.460987
+
+</td>
+
+<td style="text-align:right;">
+
+15.916464
+
+</td>
+
+<td style="text-align:right;">
+
+278.74807
+
+</td>
+
+<td style="text-align:right;">
+
+0.2943001
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+HFC.PFCs.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+12
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0219541
+
+</td>
+
+<td style="text-align:right;">
+
+0.2509943
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+4.161163
+
+</td>
+
+<td style="text-align:right;">
+
+4.161163
+
+</td>
+
+<td style="text-align:right;">
+
+13.617934
+
+</td>
+
+<td style="text-align:right;">
+
+201.14719
+
+</td>
+
+<td style="text-align:right;">
+
+0.0125185
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fugitive.kg
+
+</td>
+
+<td style="text-align:right;">
+
+13
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.1221874
+
+</td>
+
+<td style="text-align:right;">
+
+0.9156211
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001560
+
+</td>
+
+<td style="text-align:right;">
+
+0.0036797
+
+</td>
+
+<td style="text-align:right;">
+
+0.0002313
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+12.189404
+
+</td>
+
+<td style="text-align:right;">
+
+12.189404
+
+</td>
+
+<td style="text-align:right;">
+
+11.026986
+
+</td>
+
+<td style="text-align:right;">
+
+130.43964
+
+</td>
+
+<td style="text-align:right;">
+
+0.0456670
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Stack.kg
+
+</td>
+
+<td style="text-align:right;">
+
+14
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.4206834
+
+</td>
+
+<td style="text-align:right;">
+
+2.7331204
+
+</td>
+
+<td style="text-align:right;">
+
+0.0003090
+
+</td>
+
+<td style="text-align:right;">
+
+0.0090083
+
+</td>
+
+<td style="text-align:right;">
+
+0.0004581
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+33.321666
+
+</td>
+
+<td style="text-align:right;">
+
+33.321666
+
+</td>
+
+<td style="text-align:right;">
+
+8.712720
+
+</td>
+
+<td style="text-align:right;">
+
+82.72182
+
+</td>
+
+<td style="text-align:right;">
+
+0.1363157
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Total.Air.kg
+
+</td>
+
+<td style="text-align:right;">
+
+15
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.5428712
+
+</td>
+
+<td style="text-align:right;">
+
+3.4459035
+
+</td>
+
+<td style="text-align:right;">
+
+0.0005675
+
+</td>
+
+<td style="text-align:right;">
+
+0.0135676
+
+</td>
+
+<td style="text-align:right;">
+
+0.0008414
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+37.092916
+
+</td>
+
+<td style="text-align:right;">
+
+37.092916
+
+</td>
+
+<td style="text-align:right;">
+
+8.377980
+
+</td>
+
+<td style="text-align:right;">
+
+73.86411
+
+</td>
+
+<td style="text-align:right;">
+
+0.1718660
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Surface.water.kg
+
+</td>
+
+<td style="text-align:right;">
+
+16
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.1281632
+
+</td>
+
+<td style="text-align:right;">
+
+1.0648699
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0003837
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+16.404607
+
+</td>
+
+<td style="text-align:right;">
+
+16.404607
+
+</td>
+
+<td style="text-align:right;">
+
+12.738129
+
+</td>
+
+<td style="text-align:right;">
+
+175.01346
+
+</td>
+
+<td style="text-align:right;">
+
+0.0531109
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+U\_ground.Water.kg
+
+</td>
+
+<td style="text-align:right;">
+
+17
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0643912
+
+</td>
+
+<td style="text-align:right;">
+
+0.5634316
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+8.839104
+
+</td>
+
+<td style="text-align:right;">
+
+8.839104
+
+</td>
+
+<td style="text-align:right;">
+
+12.131672
+
+</td>
+
+<td style="text-align:right;">
+
+164.85908
+
+</td>
+
+<td style="text-align:right;">
+
+0.0281014
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Land.kg
+
+</td>
+
+<td style="text-align:right;">
+
+18
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.3012675
+
+</td>
+
+<td style="text-align:right;">
+
+3.2804508
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0003429
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+59.730055
+
+</td>
+
+<td style="text-align:right;">
+
+59.730055
+
+</td>
+
+<td style="text-align:right;">
+
+15.784280
+
+</td>
+
+<td style="text-align:right;">
+
+271.04069
+
+</td>
+
+<td style="text-align:right;">
+
+0.1636140
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Offiste.kg
+
+</td>
+
+<td style="text-align:right;">
+
+19
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.1176076
+
+</td>
+
+<td style="text-align:right;">
+
+0.9913416
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000885
+
+</td>
+
+<td style="text-align:right;">
+
+0.0029975
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001312
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+18.394299
+
+</td>
+
+<td style="text-align:right;">
+
+18.394299
+
+</td>
+
+<td style="text-align:right;">
+
+16.006124
+
+</td>
+
+<td style="text-align:right;">
+
+285.75539
+
+</td>
+
+<td style="text-align:right;">
+
+0.0494436
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+POTW.Metal.kg
+
+</td>
+
+<td style="text-align:right;">
+
+20
+
+</td>
+
+<td style="text-align:right;">
+
+402
+
+</td>
+
+<td style="text-align:right;">
+
+0.0007064
+
+</td>
+
+<td style="text-align:right;">
+
+0.0036614
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000332
+
+</td>
+
+<td style="text-align:right;">
+
+0.0000000
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+0.040218
+
+</td>
+
+<td style="text-align:right;">
+
+0.040218
+
+</td>
+
+<td style="text-align:right;">
+
+7.481724
+
+</td>
+
+<td style="text-align:right;">
+
+61.88361
+
+</td>
+
+<td style="text-align:right;">
+
+0.0001826
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 # Clustering for the data
 
@@ -262,7 +2690,7 @@ coef_signif_list <- bestglm_list %>%
   select(target, r.squared, adj.r.squared, p.value) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 # result
-knitr::kable(coef_signif_list)
+coef_signif_list %>% arrange(desc(p.value)) %>% knitr::kable()
 ```
 
 <table>
@@ -347,81 +2775,19 @@ WaterWithdrawalsKgal
 
 <td style="text-align:left;">
 
-CO.t
+POTW.Metal.kg
 
 </td>
 
 <td style="text-align:right;">
 
-0.7511409
+0.4867847
 
 </td>
 
 <td style="text-align:right;">
 
-0.7476604
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.948(\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.275(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.676(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-NH3.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.7683303
-
-</td>
-
-<td style="text-align:right;">
-
-0.7642299
+0.4817033
 
 </td>
 
@@ -433,711 +2799,27 @@ NH3.t
 
 <td style="text-align:left;">
 
-5.29(\*\*\*)
+\-1.03(\*)
 
 </td>
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
-
-0.141(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.68(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.195(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-NOx.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.9117863
-
-</td>
-
-<td style="text-align:right;">
-
-0.9099226
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-3.39(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-1.1(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-PM10.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.8891458
-
-</td>
-
-<td style="text-align:right;">
-
-0.8860010
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-0.842
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.847(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-PM2.5.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.8781678
-
-</td>
-
-<td style="text-align:right;">
-
-0.8745845
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-4.38(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.237(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.725(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-SO2.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.9283235
-
-</td>
-
-<td style="text-align:right;">
-
-0.9267985
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.76(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.18(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.172(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.636(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-VOC.t
-
-</td>
-
-<td style="text-align:right;">
-
-0.6905785
-
-</td>
-
-<td style="text-align:right;">
-
-0.6862205
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-2.74(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-1.07(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Total.t.CO2e
-
-</td>
-
-<td style="text-align:right;">
-
-0.9828135
-
-</td>
-
-<td style="text-align:right;">
-
-0.9823259
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-1.6(\*\*\*)
+0.215(\*\*)
 
 </td>
 
 <td style="text-align:left;">
 
-0.244(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.334(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.573(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.229(\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CO2.Fossil.t.CO2e
-
-</td>
-
-<td style="text-align:right;">
-
-0.9910351
-
-</td>
-
-<td style="text-align:right;">
-
-0.9908457
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-2.48(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.262(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.237(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.658(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-\-0.252(\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Fugitive.kg
-
-</td>
-
-<td style="text-align:right;">
-
-0.6404521
-
-</td>
-
-<td style="text-align:right;">
-
-0.6378467
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-\-2.31(\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.89(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Stack.kg
-
-</td>
-
-<td style="text-align:right;">
-
-0.5949768
-
-</td>
-
-<td style="text-align:right;">
-
-0.5920418
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-0.945(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.533(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.166(\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-0.35(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Total.Air.kg
-
-</td>
-
-<td style="text-align:right;">
-
-0.6697148
-
-</td>
-
-<td style="text-align:right;">
-
-0.6649625
-
-</td>
-
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-5.2(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-1.23(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Surface.water.kg
-
-</td>
-
-<td style="text-align:right;">
-
-0.6229475
-
-</td>
-
-<td style="text-align:right;">
-
-0.6194563
-
 </td>
 
-<td style="text-align:right;">
-
-0
-
-</td>
-
-<td style="text-align:left;">
-
-2.97(\*\*\*)
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
 <td style="text-align:left;">
 
 </td>
 
 <td style="text-align:left;">
-
-1.5(\*\*\*)
 
-</td>
-
-<td style="text-align:left;">
+0.755(\*\*\*)
 
 </td>
 
@@ -1283,19 +2965,19 @@ Offiste.kg
 
 <td style="text-align:left;">
 
-POTW.Metal.kg
+Surface.water.kg
 
 </td>
 
 <td style="text-align:right;">
 
-0.4867847
+0.6229475
 
 </td>
 
 <td style="text-align:right;">
 
-0.4817033
+0.6194563
 
 </td>
 
@@ -1307,13 +2989,7 @@ POTW.Metal.kg
 
 <td style="text-align:left;">
 
-\-1.03(\*)
-
-</td>
-
-<td style="text-align:left;">
-
-0.215(\*\*)
+2.97(\*\*\*)
 
 </td>
 
@@ -1327,7 +3003,759 @@ POTW.Metal.kg
 
 <td style="text-align:left;">
 
-0.755(\*\*\*)
+1.5(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Stack.kg
+
+</td>
+
+<td style="text-align:right;">
+
+0.5949768
+
+</td>
+
+<td style="text-align:right;">
+
+0.5920418
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+0.945(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.533(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.166(\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.35(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Fugitive.kg
+
+</td>
+
+<td style="text-align:right;">
+
+0.6404521
+
+</td>
+
+<td style="text-align:right;">
+
+0.6378467
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-2.31(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.89(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Total.Air.kg
+
+</td>
+
+<td style="text-align:right;">
+
+0.6697148
+
+</td>
+
+<td style="text-align:right;">
+
+0.6649625
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+5.2(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+1.23(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NH3.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.7683303
+
+</td>
+
+<td style="text-align:right;">
+
+0.7642299
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+5.29(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.141(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.68(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.195(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+VOC.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.6905785
+
+</td>
+
+<td style="text-align:right;">
+
+0.6862205
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+2.74(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+1.07(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+CO.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.7511409
+
+</td>
+
+<td style="text-align:right;">
+
+0.7476604
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-0.948(\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.275(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.676(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+PM2.5.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.8781678
+
+</td>
+
+<td style="text-align:right;">
+
+0.8745845
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-4.38(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.237(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.725(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+PM10.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.8891458
+
+</td>
+
+<td style="text-align:right;">
+
+0.8860010
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+0.842
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+0.847(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+NOx.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.9117863
+
+</td>
+
+<td style="text-align:right;">
+
+0.9099226
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+3.39(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+1.1(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+SO2.t
+
+</td>
+
+<td style="text-align:right;">
+
+0.9283235
+
+</td>
+
+<td style="text-align:right;">
+
+0.9267985
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-0.76(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.18(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.172(\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.636(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Total.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+0.9828135
+
+</td>
+
+<td style="text-align:right;">
+
+0.9823259
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-1.6(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.244(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.334(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.573(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+\-0.229(\*)
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+CO2.Fossil.t.CO2e
+
+</td>
+
+<td style="text-align:right;">
+
+0.9910351
+
+</td>
+
+<td style="text-align:right;">
+
+0.9908457
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+\-2.48(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.262(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.237(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+0.658(\*\*\*)
+
+</td>
+
+<td style="text-align:left;">
+
+\-0.252(\*)
 
 </td>
 

@@ -159,15 +159,19 @@ coef_signif_list <- bestglm_list %>%
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
 # result
-coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE)
-coef_signif_list %>% arrange(desc(adj.r.squared)) %>% knitr::kable(format = "markdown") 
+coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+coef_signif_list %>% 
+  select(target, sum_elastic, everything()) %>% 
+  arrange(desc(adj.r.squared)) %>%
+  knitr::kable(format = "markdown") 
 ```
 
 # Communciate and visualize the results
 
 ## The linear model with R^2 >0.75
 ```{r}
-good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm %>% arrange(desc(adj.r.squared))
+good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
+good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% unlist
 ```
 
 ## The diagnosis of linear model

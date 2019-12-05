@@ -168,6 +168,15 @@ bind_coef_star <- function(x) {
     ""
   }
 }
+
+# test: model <- bestglm_list$best_model[[1]], null <- 1
+waldtest_map <- function(model, null= NULL){
+  test.terms <- paste0("~", names(coef(model))[-1] %>% paste(collapse = "+")) %>% 
+    as.formula()
+  test_result <- survey::regTermTest(model = model, test.terms ,null = null)
+  pval_wald <- test_result[['p']] %>% as.numeric()
+  return(pval_wald)
+}
 ```
 
 ## Linear Regression Modeling with log10 Transformation on Input and Output
@@ -196,7 +205,9 @@ bestglm_list <- target_list %>%
   mutate(best_model = top_model %>% map(function(top_model) top_model[[1]])) %>% 
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
-  tidyr::unnest(statisics)
+  tidyr::unnest(statisics) %>% 
+  mutate(wald_pval = best_model %>% 
+                          purrr::map_dbl(function(model) waldtest_map(model= model, null= 1)))
 # extract coefficient from the best model of each impact variable
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -220,35 +231,37 @@ datArray <- abind::abind(coef_list %>%
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
 coef_signif_list <- bestglm_list %>% 
-  select(target, r.squared, adj.r.squared, p.value) %>% 
+  select(target, wald_pval, r.squared, adj.r.squared, p.value) %>% 
+  mutate_at(c("r.squared", "wald_pval", "adj.r.squared", "p.value"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
-# result
 coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+
+# result
 coef_signif_list %>% 
-  select(target, sum_elastic, everything()) %>% 
+  select(target, sum_elastic, wald_pval, everything()) %>% 
   arrange(desc(adj.r.squared)) %>%
   knitr::kable(format = "markdown") 
 ```
 
-| target            | sum\_elastic | r.squared | adj.r.squared | p.value | (Intercept)    | BioWasteTJ    | CoalTJ        | NatGaseTJ     | NonFossElecTJ | PetrolTJ      | WaterWithdrawalsKgal |
-| :---------------- | -----------: | --------: | ------------: | ------: | :------------- | :------------ | :------------ | :------------ | :------------ | :------------ | :------------------- |
-| CO2.Fossil.t.CO2e |        0.906 | 0.9910351 |     0.9908457 |       0 | \-2.48(\*\*\*) | 0.262(\*\*\*) | 0.237(\*\*\*) | 0.658(\*\*\*) | \-0.252(\*)   |               |                      |
-| Total.t.CO2e      |        0.923 | 0.9828135 |     0.9823259 |       0 | \-1.6(\*\*\*)  | 0.244(\*\*\*) | 0.334(\*\*\*) | 0.573(\*\*\*) | \-0.229(\*)   |               |                      |
-| SO2.t             |        0.988 | 0.9283235 |     0.9267985 |       0 | \-0.76(\*\*)   | 0.18(\*\*\*)  | 0.172(\*\*)   | 0.636(\*\*\*) |               |               |                      |
-| NOx.t             |        1.100 | 0.9117863 |     0.9099226 |       0 | 3.39(\*\*\*)   |               |               |               | 1.1(\*\*\*)   |               |                      |
-| PM10.t            |        0.847 | 0.8891458 |     0.8860010 |       0 | 0.842          |               | 0.847(\*\*\*) |               |               |               |                      |
-| PM2.5.t           |        0.962 | 0.8781678 |     0.8745845 |       0 | \-4.38(\*\*\*) | 0.237(\*\*)   |               | 0.725(\*\*\*) |               |               |                      |
-| NH3.t             |        1.020 | 0.7683303 |     0.7642299 |       0 | 5.29(\*\*\*)   |               | 0.141(\*\*\*) | 0.68(\*\*\*)  |               | 0.195(\*\*\*) |                      |
-| CO.t              |        0.951 | 0.7511409 |     0.7476604 |       0 | \-0.948(\*)    | 0.275(\*\*\*) |               | 0.676(\*\*\*) |               |               |                      |
-| VOC.t             |        1.070 | 0.6905785 |     0.6862205 |       0 | 2.74(\*\*\*)   |               |               |               | 1.07(\*\*\*)  |               |                      |
-| Total.Air.kg      |        1.230 | 0.6697148 |     0.6649625 |       0 | 5.2(\*\*\*)    |               |               |               | 1.23(\*\*\*)  |               |                      |
-| Fugitive.kg       |        0.890 | 0.6404521 |     0.6378467 |       0 | \-2.31(\*\*)   |               |               |               | 0.89(\*\*\*)  |               |                      |
-| Surface.water.kg  |        1.500 | 0.6229475 |     0.6194563 |       0 | 2.97(\*\*\*)   |               |               | 1.5(\*\*\*)   |               |               |                      |
-| Stack.kg          |        1.050 | 0.5949768 |     0.5920418 |       0 | 0.945(\*\*\*)  |               | 0.533(\*\*\*) | 0.166(\*)     |               | 0.35(\*\*\*)  |                      |
-| POTW.Metal.kg     |        0.969 | 0.4867847 |     0.4817033 |       0 | \-1.03(\*)     | 0.215(\*\*)   |               |               | 0.755(\*\*\*) |               |                      |
-| Offiste.kg        |        1.040 | 0.4845963 |     0.4806316 |       0 | 5.8(\*\*\*)    |               | 0.165(\*\*\*) | 0.707(\*\*\*) |               | 0.204(\*\*\*) | \-0.0377(\*)         |
-| Land.kg           |        1.150 | 0.4658109 |     0.4611250 |       0 | 5.65(\*\*\*)   |               |               |               | 0.9(\*\*\*)   | 0.249(\*\*)   |                      |
+| target            | sum\_elastic | wald\_pval | r.squared | adj.r.squared | p.value | (Intercept)    | BioWasteTJ    | CoalTJ        | NatGaseTJ     | NonFossElecTJ | PetrolTJ      | WaterWithdrawalsKgal |
+| :---------------- | -----------: | ---------: | --------: | ------------: | ------: | :------------- | :------------ | :------------ | :------------ | :------------ | :------------ | :------------------- |
+| CO2.Fossil.t.CO2e |        0.906 |   0.00e+00 |     0.991 |         0.991 |       0 | \-2.48(\*\*\*) | 0.262(\*\*\*) | 0.237(\*\*\*) | 0.658(\*\*\*) | \-0.252(\*)   |               |                      |
+| Total.t.CO2e      |        0.923 |   0.00e+00 |     0.983 |         0.982 |       0 | \-1.6(\*\*\*)  | 0.244(\*\*\*) | 0.334(\*\*\*) | 0.573(\*\*\*) | \-0.229(\*)   |               |                      |
+| SO2.t             |        0.988 |   0.00e+00 |     0.928 |         0.927 |       0 | \-0.76(\*\*)   | 0.18(\*\*\*)  | 0.172(\*\*)   | 0.636(\*\*\*) |               |               |                      |
+| NOx.t             |        1.100 |   0.00e+00 |     0.912 |         0.910 |       0 | 3.39(\*\*\*)   |               |               |               | 1.1(\*\*\*)   |               |                      |
+| PM10.t            |        0.847 |   0.00e+00 |     0.889 |         0.886 |       0 | 0.842          |               | 0.847(\*\*\*) |               |               |               |                      |
+| PM2.5.t           |        0.962 |   0.00e+00 |     0.878 |         0.875 |       0 | \-4.38(\*\*\*) | 0.237(\*\*)   |               | 0.725(\*\*\*) |               |               |                      |
+| NH3.t             |        1.020 |   0.00e+00 |     0.768 |         0.764 |       0 | 5.29(\*\*\*)   |               | 0.141(\*\*\*) | 0.68(\*\*\*)  |               | 0.195(\*\*\*) |                      |
+| CO.t              |        0.951 |   0.00e+00 |     0.751 |         0.748 |       0 | \-0.948(\*)    | 0.275(\*\*\*) |               | 0.676(\*\*\*) |               |               |                      |
+| VOC.t             |        1.070 |   0.00e+00 |     0.691 |         0.686 |       0 | 2.74(\*\*\*)   |               |               |               | 1.07(\*\*\*)  |               |                      |
+| Total.Air.kg      |        1.230 |   0.00e+00 |     0.670 |         0.665 |       0 | 5.2(\*\*\*)    |               |               |               | 1.23(\*\*\*)  |               |                      |
+| Fugitive.kg       |        0.890 |   1.70e-01 |     0.640 |         0.638 |       0 | \-2.31(\*\*)   |               |               |               | 0.89(\*\*\*)  |               |                      |
+| Surface.water.kg  |        1.500 |   1.93e-05 |     0.623 |         0.619 |       0 | 2.97(\*\*\*)   |               |               | 1.5(\*\*\*)   |               |               |                      |
+| Stack.kg          |        1.050 |   9.06e-03 |     0.595 |         0.592 |       0 | 0.945(\*\*\*)  |               | 0.533(\*\*\*) | 0.166(\*)     |               | 0.35(\*\*\*)  |                      |
+| POTW.Metal.kg     |        0.969 |   2.28e-01 |     0.487 |         0.482 |       0 | \-1.03(\*)     | 0.215(\*\*)   |               |               | 0.755(\*\*\*) |               |                      |
+| Offiste.kg        |        1.040 |   4.55e-01 |     0.485 |         0.481 |       0 | 5.8(\*\*\*)    |               | 0.165(\*\*\*) | 0.707(\*\*\*) |               | 0.204(\*\*\*) | \-0.0377(\*)         |
+| Land.kg           |        1.150 |   7.41e-02 |     0.466 |         0.461 |       0 | 5.65(\*\*\*)   |               |               |               | 0.9(\*\*\*)   | 0.249(\*\*)   |                      |
 
 # Communciate and visualize the results
 

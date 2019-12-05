@@ -57,17 +57,22 @@ Chain](doc/LCA_%20Pet%20Food%20Supply%20Chain%20.png)
 
 # Data description
 
-What kind of data is avialble? How is your data collected? Are there any
-concerns about the data? Which data is the most relevant? Is the data
-easy to acccess? Will the data change over time? What needs to be done
-to the data to get it ready for any downstream analysis?
-
 The dataset for this project is the first pass life cycle assessment
 results for cat and dog food manufacturing. It provides the
 environmental impact information into the pet food supply chain. The LCA
 data was generated through EIO-LCA
 website(<http://www.eiolca.net/cgi-bin/dft/use.pl>). The model for
-getting the LCA data is US 2002 producer price benchmark.
+getting the LCA data is US 2002 producer price benchmark. In order to
+get the dog and cat food manufacturing LCA data, the user needs to
+select “Food beverage and tobacco” sector group, dog and cat food
+manufacturing sector and then the amount of economic activity for this
+sector(e.g. 1 millon dollars). After setting up the sector and economic
+parameters, The user could select different economical and environmental
+impact to get the LCA results. The LCA results are ready for downloading
+as excel files. The raw data was lacking the columns name for different
+impact feature and index for identifying the different sectors and
+sector group. The web scraping is necessary for the columns name and
+NAICS sector code.
 
 # Explore the data
 
@@ -77,7 +82,6 @@ modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
 ``` r
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
-
 # Input columns 
 X <- dat %>% 
   select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
@@ -156,6 +160,8 @@ psych::describe(ys)
 #> POTW.Metal.kg        0.04  7.48    61.88 0.00
 ```
 
+# Clustering for the data
+
 # Fit Models
 
 ## user-define function
@@ -172,12 +178,11 @@ makedata_map <- function(target_nm, dat){
   # retin all inf by log(x + min/100)
   #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
   # remove all inf= log(0)
-  Xy <- cbind(dat %>% select(Sector), log10(Xy)) 
+  Xy <- cbind(dat %>% select(Sector), log(Xy)) 
   Xy <- Xy[!is.infinite(rowSums(Xy)),] %>% mutate(Sector= Sector %>% as.factor())
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
-
 bind_coef_star <- function(x) {
   if (stringr::str_detect(x[2] , "\\*")) {
     paste0(x[1], "(",x[2], ")")
@@ -217,7 +222,6 @@ target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); ta
 #> 18 Land.kg           
 #> 19 Offiste.kg        
 #> 20 POTW.Metal.kg
-
 # model selection for each impact variable
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
@@ -232,7 +236,6 @@ bestglm_list <- target_list %>%
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
   tidyr::unnest(statisics)
-
 # extract coefficient from the best model of each impact variable
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -240,7 +243,6 @@ coef_list <- bestglm_list %>%
   tidyr::unnest(coefs) %>% 
   select(target, term, estimate) %>% 
   tidyr::spread(key= term, value = estimate)
-
 # extract p-value for each paramters of the best model of each impact variable
 signif_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -248,7 +250,6 @@ signif_list <- bestglm_list %>%
   tidyr::unnest(coefs) %>% 
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
-
 # combind coefficient and p-value to result in a tidy table of the result
 datArray <- abind::abind(coef_list %>% 
                            select(-target) %>% 
@@ -260,7 +261,6 @@ datArray <- abind::abind(coef_list %>%
 coef_signif_list <- bestglm_list %>% 
   select(target, r.squared, adj.r.squared, p.value) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
-
 # result
 knitr::kable(coef_signif_list)
 ```
@@ -371,7 +371,7 @@ CO.t
 
 <td style="text-align:left;">
 
-\-0.412(\*)
+\-0.948(\*)
 
 </td>
 
@@ -433,7 +433,7 @@ NH3.t
 
 <td style="text-align:left;">
 
-2.3(\*\*\*)
+5.29(\*\*\*)
 
 </td>
 
@@ -497,7 +497,7 @@ NOx.t
 
 <td style="text-align:left;">
 
-1.47(\*\*\*)
+3.39(\*\*\*)
 
 </td>
 
@@ -557,7 +557,7 @@ PM10.t
 
 <td style="text-align:left;">
 
-0.366
+0.842
 
 </td>
 
@@ -617,7 +617,7 @@ PM2.5.t
 
 <td style="text-align:left;">
 
-\-1.9(\*\*\*)
+\-4.38(\*\*\*)
 
 </td>
 
@@ -679,7 +679,7 @@ SO2.t
 
 <td style="text-align:left;">
 
-\-0.33(\*\*)
+\-0.76(\*\*)
 
 </td>
 
@@ -743,7 +743,7 @@ VOC.t
 
 <td style="text-align:left;">
 
-1.19(\*\*\*)
+2.74(\*\*\*)
 
 </td>
 
@@ -803,7 +803,7 @@ Total.t.CO2e
 
 <td style="text-align:left;">
 
-\-0.693(\*\*\*)
+\-1.6(\*\*\*)
 
 </td>
 
@@ -869,7 +869,7 @@ CO2.Fossil.t.CO2e
 
 <td style="text-align:left;">
 
-\-1.08(\*\*\*)
+\-2.48(\*\*\*)
 
 </td>
 
@@ -935,7 +935,7 @@ Fugitive.kg
 
 <td style="text-align:left;">
 
-\-1(\*\*)
+\-2.31(\*\*)
 
 </td>
 
@@ -995,7 +995,7 @@ Stack.kg
 
 <td style="text-align:left;">
 
-0.41(\*\*\*)
+0.945(\*\*\*)
 
 </td>
 
@@ -1059,7 +1059,7 @@ Total.Air.kg
 
 <td style="text-align:left;">
 
-2.26(\*\*\*)
+5.2(\*\*\*)
 
 </td>
 
@@ -1119,7 +1119,7 @@ Surface.water.kg
 
 <td style="text-align:left;">
 
-1.29(\*\*\*)
+2.97(\*\*\*)
 
 </td>
 
@@ -1179,7 +1179,7 @@ Land.kg
 
 <td style="text-align:left;">
 
-2.45(\*\*\*)
+5.65(\*\*\*)
 
 </td>
 
@@ -1241,7 +1241,7 @@ Offiste.kg
 
 <td style="text-align:left;">
 
-2.52(\*\*\*)
+5.8(\*\*\*)
 
 </td>
 
@@ -1307,7 +1307,7 @@ POTW.Metal.kg
 
 <td style="text-align:left;">
 
-\-0.447(\*)
+\-1.03(\*)
 
 </td>
 
@@ -1354,13 +1354,13 @@ good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm %>% arrange(des
 #> # A tibble: 7 x 16
 #>   target data  top_model best_model anv   r.squared adj.r.squared sigma
 #>   <chr>  <lis> <list>    <list>     <lis>     <dbl>         <dbl> <dbl>
-#> 1 CO2.F… <df[… <bestglm> <lm>       <df[…     0.991         0.991 0.106
-#> 2 Total… <df[… <bestglm> <lm>       <df[…     0.983         0.982 0.151
-#> 3 SO2.t  <df[… <bestglm> <lm>       <df[…     0.928         0.927 0.349
-#> 4 NOx.t  <df[… <bestglm> <lm>       <df[…     0.912         0.910 0.336
-#> 5 PM10.t <df[… <bestglm> <lm>       <df[…     0.889         0.886 0.384
-#> 6 PM2.5… <df[… <bestglm> <lm>       <df[…     0.878         0.875 0.390
-#> 7 NH3.t  <df[… <bestglm> <lm>       <df[…     0.768         0.764 0.524
+#> 1 CO2.F… <df[… <bestglm> <lm>       <df[…     0.991         0.991 0.243
+#> 2 Total… <df[… <bestglm> <lm>       <df[…     0.983         0.982 0.347
+#> 3 SO2.t  <df[… <bestglm> <lm>       <df[…     0.928         0.927 0.803
+#> 4 NOx.t  <df[… <bestglm> <lm>       <df[…     0.912         0.910 0.774
+#> 5 PM10.t <df[… <bestglm> <lm>       <df[…     0.889         0.886 0.885
+#> 6 PM2.5… <df[… <bestglm> <lm>       <df[…     0.878         0.875 0.898
+#> 7 NH3.t  <df[… <bestglm> <lm>       <df[…     0.768         0.764 1.21 
 #> # … with 8 more variables: statistic <dbl>, p.value <dbl>, df <int>,
 #> #   logLik <dbl>, AIC <dbl>, BIC <dbl>, deviance <dbl>, df.residual <int>
 ```
@@ -1424,7 +1424,6 @@ good_lm$target
 # SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
 # Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
 # CO2.Fossil.t.CO2e C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
-
 par(mfrow=c(1,2))
 plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
@@ -1433,7 +1432,6 @@ plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 ``` r
-
 plot(good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 ```
@@ -1441,7 +1439,6 @@ plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
 <img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
 
 ``` r
-
 plot(good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 ```
@@ -1449,7 +1446,6 @@ plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
 <img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
 
 ``` r
-
 plot(good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 plot(good_lm$data[[4]][,1], good_lm$data[[4]][,ncol(good_lm$data[[4]])])
 ```

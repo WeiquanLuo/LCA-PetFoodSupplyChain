@@ -11,16 +11,19 @@ dat <- read.csv("data/dat_311111_1M_v2.csv")
 colnames(dat)
 
 # outlier removal
-#dat[which(dat$X %in% c(16, 78, 88)),]
-#dat <- dat[-which(dat$X %in% c(16, 78, 88)),]
+dat[which(dat$X %in% c(16, 78, 88)),]
+dat <- dat[-which(dat$X %in% c(16, 78, 88)),]
 dat$X
 dat %>% tibble()
 
 # target columns 
+ECO <- dat %>% select(Total.Economic.mill.dollar, Total.value.Added.mill.dollar, 
+                      Employee.Com.mill.dollar, Net.Tax.mill.dollar,
+                      Profits.mill.dollar, Direct.Economic.mill.dollar,Direct.Economic)
 CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
 TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
-target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list
+target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX), colnames(ECO))); target_list
 
 # test: target_nm = "CO.t"
 makedata_map <- function(target_nm, dat){
@@ -33,7 +36,7 @@ makedata_map <- function(target_nm, dat){
   # retin all inf by log(x + min/100)
   #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
   # remove all inf= log(0)
-  Xy <- cbind(dat %>% select(Sector), log10(Xy)) 
+  Xy <- cbind(dat %>% select(Sector), log(Xy+1)) 
   Xy <- Xy[!is.infinite(rowSums(Xy)),] %>% mutate(Sector= Sector %>% as.factor())
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
@@ -97,7 +100,8 @@ coef_signif_list # aggregation view of coef and signif
 
 #save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
 
-good_lm <- bestglm_list %>% filter(adj.r.squared >0.75); good_lm
+good_coef <- coef_signif_list %>% filter(adj.r.squared >0.75); good_coef
+good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[1]], which=1:6)
 plot(good_lm$best_model[[2]], which=1:6)

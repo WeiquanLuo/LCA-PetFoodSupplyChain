@@ -111,6 +111,15 @@ bind_coef_star <- function(x) {
     ""
   }
 }
+
+# test: model <- bestglm_list$best_model[[1]], null <- 1
+waldtest_map <- function(model, null= NULL){
+  test.terms <- paste0("~", names(coef(model))[-1] %>% paste(collapse = "+")) %>% 
+    as.formula()
+  test_result <- survey::regTermTest(model = model, test.terms ,null = null)
+  pval_wald <- test_result[['p']] %>% as.numeric()
+  return(pval_wald)
+}
 ```
 
 ## Linear Regression Modeling with log10 Transformation on Input and Output
@@ -131,7 +140,9 @@ bestglm_list <- target_list %>%
   mutate(best_model = top_model %>% map(function(top_model) top_model[[1]])) %>% 
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
-  tidyr::unnest(statisics)
+  tidyr::unnest(statisics) %>% 
+  mutate(wald_pval = best_model %>% 
+                          purrr::map_dbl(function(model) waldtest_map(model= model, null= 1)))
 # extract coefficient from the best model of each impact variable
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -155,13 +166,15 @@ datArray <- abind::abind(coef_list %>%
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
 coef_signif_list <- bestglm_list %>% 
-  select(target, r.squared, adj.r.squared, p.value) %>% 
+  select(target, wald_pval, r.squared, adj.r.squared, p.value) %>% 
+  mutate_at(c("r.squared", "wald_pval", "adj.r.squared", "p.value"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
-# result
 coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+
+# result
 coef_signif_list %>% 
-  select(target, sum_elastic, everything()) %>% 
+  select(target, sum_elastic, wald_pval, everything()) %>% 
   arrange(desc(adj.r.squared)) %>%
   knitr::kable(format = "markdown") 
 ```

@@ -42,6 +42,17 @@ makedata_map <- function(target_nm, dat){
   return(Xy)
 }
 
+
+# test: model <- bestglm_list$best_model[[1]], null <- 1
+waldtest_map <- function(model, null= NULL){
+  test.terms <- paste0("~", names(coef(model))[-1] %>% paste(collapse = "+")) %>% 
+    as.formula()
+  test_result <- survey::regTermTest(model = model, test.terms ,null = null)
+  pval_wald <- test_result[['p']] %>% as.numeric()
+  return(pval_wald)
+}
+
+# model selection for each impact variable
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
            map(function(target_nm) makedata_map(target_nm,
@@ -54,7 +65,10 @@ bestglm_list <- target_list %>%
   mutate(best_model = top_model %>% map(function(top_model) top_model[[1]])) %>% 
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
-  tidyr::unnest(statisics)
+  tidyr::unnest(statisics) %>% 
+  mutate(wald_pval = best_model %>% 
+           purrr::map_dbl(function(model) waldtest_map(model= model, null= 1)))
+
 
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -81,6 +95,7 @@ bind_coef_star <- function(x) {
   }
 }
 
+
 datArray <- abind::abind(coef_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, signif, digits = 3) %>% 
@@ -89,8 +104,12 @@ datArray <- abind::abind(coef_list %>%
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
 coef_signif_list <- bestglm_list %>% 
-  select(target, r.squared, adj.r.squared, p.value) %>% 
+  select(target, wald_pval, r.squared, adj.r.squared, p.value) %>% 
+  mutate_at(c("r.squared", "wald_pval", "adj.r.squared", "p.value"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
+
+coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+
 
 # result
 bestglm_list # result of model selection

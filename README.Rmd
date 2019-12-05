@@ -99,7 +99,8 @@ makedata_map <- function(target_nm, dat){
   # retin all inf by log(x + min/100)
   #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
   # remove all inf= log(0)
-  Xy <- log10(Xy) %>% filter_all(all_vars(!is.infinite(.)))
+  Xy <- cbind(dat %>% select(Sector), log10(Xy)) 
+  Xy <- Xy[!is.infinite(rowSums(Xy)),] %>% mutate(Sector= Sector %>% as.factor())
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }

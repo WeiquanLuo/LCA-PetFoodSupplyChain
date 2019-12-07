@@ -217,13 +217,13 @@ psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)),
 library("knitr")
 library("devtools")
 #> Loading required package: usethis
-url<-"https://plot.ly/~weiquanluo/1/.embed?width=550&height=550" 
+url<-"https://plot.ly/~weiquanluo/1/embed?width=550&height=550" 
 plotly_iframe <- paste("<center><iframe scrolling='no' seamless='seamless' style='border:none' src='", url, "/800/1200' width='800' height='1200'></iframe></center>", sep = "")
 ```
 
 <center>
 
-<iframe scrolling="no" seamless="seamless" style="border:none" src="https://plot.ly/~weiquanluo/1/.embed?width=550&amp;height=550/800/1200" width="800" height="1200">
+<iframe scrolling="no" seamless="seamless" style="border:none" src="https://plot.ly/~weiquanluo/1/embed?width=550&amp;height=550/800/1200" width="800" height="1200">
 
 </iframe>
 

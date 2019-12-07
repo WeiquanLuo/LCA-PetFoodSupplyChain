@@ -82,82 +82,166 @@ modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
 ``` r
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
-# Input columns 
-X <- dat %>% 
-  select(Coal.TJ, NatGase.TJ, Petrol.TJ, Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal)
-psych::describe(X) %>% knitr::kable(format = "markdown") 
+colnames(dat)
+#>  [1] "X"                             "Sector"                       
+#>  [3] "Description"                   "name_sub"                     
+#>  [5] "Sector_sub"                    "Total.Economic.mill.dollar"   
+#>  [7] "Total.value.Added.mill.dollar" "Employee.Com.mill.dollar"     
+#>  [9] "Net.Tax.mill.dollar"           "Profits.mill.dollar"          
+#> [11] "Direct.Economic.mill.dollar"   "Direct.Economic"              
+#> [13] "CO.t"                          "NH3.t"                        
+#> [15] "NOx.t"                         "PM10.t"                       
+#> [17] "PM2.5.t"                       "SO2.t"                        
+#> [19] "VOC.t"                         "Total.Energy.TJ"              
+#> [21] "Coal.TJ"                       "NatGase.TJ"                   
+#> [23] "Petrol.TJ"                     "Bio.Waste.TJ"                 
+#> [25] "NonFossElec.TJ"                "Total.t.CO2e"                 
+#> [27] "CO2.Fossil.t.CO2e"             "CO2.Process.t.CO2e"           
+#> [29] "CH4.t.CO2e"                    "N2O.t.CO2e"                   
+#> [31] "HFC.PFCs.t.CO2e"               "Fugitive.kg"                  
+#> [33] "Stack.kg"                      "Total.Air.kg"                 
+#> [35] "Surface.water.kg"              "U_ground.Water.kg"            
+#> [37] "Land.kg"                       "Offiste.kg"                   
+#> [39] "POTW.Metal.kg"                 "POTW.Nonmetal.kg"             
+#> [41] "Water.Withdrawals.Kgal"
 ```
 
-|                        | vars |   n |        mean |           sd |    median |   trimmed |       mad | min |          max |        range |     skew | kurtosis |          se |
-| :--------------------- | ---: | --: | ----------: | -----------: | --------: | --------: | --------: | --: | -----------: | -----------: | -------: | -------: | ----------: |
-| Coal.TJ                |    1 | 402 |   0.0076337 |    0.1168583 | 0.0000010 | 0.0000344 | 0.0000015 |   0 | 2.321467e+00 | 2.321467e+00 | 19.34331 | 379.4182 |   0.0058284 |
-| NatGase.TJ             |    2 | 402 |   0.0110593 |    0.0797249 | 0.0001375 | 0.0006286 | 0.0002039 |   0 | 1.366673e+00 | 1.366673e+00 | 13.87669 | 217.6585 |   0.0039763 |
-| Petrol.TJ              |    3 | 402 |   0.0086899 |    0.0654656 | 0.0000235 | 0.0003121 | 0.0000348 |   0 | 1.088900e+00 | 1.088900e+00 | 13.11028 | 195.8157 |   0.0032651 |
-| Bio.Waste.TJ           |    4 | 402 |   0.0019597 |    0.0143116 | 0.0000010 | 0.0000250 | 0.0000015 |   0 | 1.806160e-01 | 1.806160e-01 | 10.26709 | 114.4378 |   0.0007138 |
-| NonFossElec.TJ         |    5 | 402 |   0.0042177 |    0.0251197 | 0.0001570 | 0.0005038 | 0.0002298 |   0 | 4.231030e-01 | 4.231030e-01 | 13.11334 | 200.3802 |   0.0012529 |
-| Water.Withdrawals.Kgal |    6 | 402 | 446.1435342 | 7894.3608174 | 0.0428940 | 0.5317598 | 0.0630550 |   0 | 1.580305e+05 | 1.580305e+05 | 19.78841 | 391.9673 | 393.7349309 |
-
 ``` r
-M <- cor(X)
-corrplot::corrplot(M, method="color")
+# zero value resut in a greater intercept in regression
+# need to make sure the data are greater than 1 before log transform.
+xy <- dat %>% select(Petrol.TJ, Coal.TJ) %>% as_tibble();xy
+#> # A tibble: 402 x 2
+#>    Petrol.TJ  Coal.TJ
+#>        <dbl>    <dbl>
+#>  1  0.0350   0.000091
+#>  2  0.000572 0.000017
+#>  3  0.00749  0.000044
+#>  4  0.00186  0.000024
+#>  5  0.0562   0       
+#>  6  0.000718 0       
+#>  7  0.00112  0       
+#>  8  0.000176 0       
+#>  9  0.000077 0.000002
+#> 10  0.000001 0       
+#> # … with 392 more rows
+xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
+#> [1] 402   2
+xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
+#> [1] 402   2
+xy_1[,1] <- xy_1[,1]*1000
+xy_0[,1] <- xy_0[,1]*1000
+
+plot(log(xy_1+1), type="p",col="blue", 
+     xlab = 'Coal.GJ', ylab= "Petrol.TJ")
+points(log(xy_0+1), type="p",col="red")
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
 ``` r
-# target columns 
-CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t)
-GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e)
-TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg)
+# calculate and rename
+calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= pattern, replacement= replacement){
+  
+  calculate_formula<- function(data, formula = formula){
+    as.function <- function(formula) {
+      cmd <- tail(as.character(formula),1)
+      exp <- parse(text=cmd)
+      function(...) eval(exp, list(...))
+    }
+    formula.function <- as.function(formula)
+    result<- formula.function(x=data)
+    return(result)
+  }
+  data <- data %>% dplyr::mutate_all(calculate_formula, formula = formula) %>% 
+    stats::setNames(stringr::str_replace_all(names(.), pattern= pattern, replacement= replacement )) 
+  return(data)
+}
+
+
+# Sort environment impact group and input resouce; 
+# unit convertion to result no 0<.<1; 
+# rename by unit
+CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t) %>% 
+  calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.t", replacement= ".g")
+GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e) %>% 
+  calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.t", replacement= ".g")
+TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_ground.Water.kg, Land.kg, Offiste.kg, POTW.Metal.kg) %>% 
+  calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.kg", replacement= ".mg")
+resource <- dat %>% select(Coal.TJ, NatGase.TJ, Petrol.TJ,Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal) %>% 
+  calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.TJ", replacement= ".MJ")
+ID <- dat %>% select(Sector, Description, name_sub, Sector_sub)
+dat <- cbind(ID, CPA, GHG, TOX, resource)
+
 ys <- cbind(CPA, GHG, TOX)
 psych::describe(ys) %>% knitr::kable(format = "markdown") 
 ```
 
-|                    | vars |   n |      mean |         sd |    median |   trimmed |       mad | min |        max |      range |      skew |  kurtosis |        se |
-| :----------------- | ---: | --: | --------: | ---------: | --------: | --------: | --------: | --: | ---------: | ---------: | --------: | --------: | --------: |
-| CO.t               |    1 | 402 | 0.0222147 |  0.2952078 | 0.0000385 | 0.0006645 | 0.0000571 |   0 |   5.888105 |   5.888105 | 19.523839 | 384.79885 | 0.0147236 |
-| NH3.t              |    2 | 402 | 0.0098300 |  0.1389211 | 0.0000010 | 0.0000086 | 0.0000015 |   0 |   2.687352 |   2.687352 | 18.084851 | 341.44049 | 0.0069288 |
-| NOx.t              |    3 | 402 | 0.0080359 |  0.0540448 | 0.0000280 | 0.0003363 | 0.0000415 |   0 |   0.707607 |   0.707607 |  9.977676 | 106.60356 | 0.0026955 |
-| PM10.t             |    4 | 402 | 0.0177165 |  0.2850504 | 0.0000055 | 0.0001408 | 0.0000082 |   0 |   5.695606 |   5.695606 | 19.666983 | 388.60310 | 0.0142170 |
-| PM2.5.t            |    5 | 402 | 0.0047236 |  0.0694547 | 0.0000040 | 0.0000720 | 0.0000059 |   0 |   1.382822 |   1.382822 | 19.453251 | 382.59517 | 0.0034641 |
-| SO2.t              |    6 | 402 | 0.0057112 |  0.0559066 | 0.0000140 | 0.0002277 | 0.0000208 |   0 |   1.082028 |   1.082028 | 17.908593 | 339.19226 | 0.0027884 |
-| VOC.t              |    7 | 402 | 0.0047379 |  0.0406288 | 0.0000225 | 0.0002173 | 0.0000334 |   0 |   0.723802 |   0.723802 | 15.184308 | 251.89230 | 0.0020264 |
-| Total.t.CO2e       |    8 | 402 | 3.8162115 | 30.7723669 | 0.0171445 | 0.1191106 | 0.0251975 |   0 | 512.173950 | 512.173950 | 13.299869 | 198.03556 | 1.5347862 |
-| CO2.Fossil.t.CO2e  |    9 | 402 | 1.8345859 | 14.4120956 | 0.0169625 | 0.0901948 | 0.0249277 |   0 | 257.559803 | 257.559803 | 14.832228 | 248.47182 | 0.7188100 |
-| CO2.Process.t.CO2e |   10 | 402 | 0.1249104 |  1.3012894 | 0.0000000 | 0.0000000 | 0.0000000 |   0 |  18.929557 |  18.929557 | 12.407185 | 160.89258 | 0.0649024 |
-| CH4.t.CO2e         |   11 | 402 | 0.5452572 |  5.9006979 | 0.0000000 | 0.0000000 | 0.0000000 |   0 | 108.460987 | 108.460987 | 15.916464 | 278.74807 | 0.2943001 |
-| HFC.PFCs.t.CO2e    |   12 | 402 | 0.0219541 |  0.2509943 | 0.0000000 | 0.0000000 | 0.0000000 |   0 |   4.161163 |   4.161163 | 13.617934 | 201.14719 | 0.0125185 |
-| Fugitive.kg        |   13 | 402 | 0.1221874 |  0.9156211 | 0.0001560 | 0.0036797 | 0.0002313 |   0 |  12.189404 |  12.189404 | 11.026986 | 130.43964 | 0.0456670 |
-| Stack.kg           |   14 | 402 | 0.4206834 |  2.7331204 | 0.0003090 | 0.0090083 | 0.0004581 |   0 |  33.321666 |  33.321666 |  8.712720 |  82.72182 | 0.1363157 |
-| Total.Air.kg       |   15 | 402 | 0.5428712 |  3.4459035 | 0.0005675 | 0.0135676 | 0.0008414 |   0 |  37.092916 |  37.092916 |  8.377980 |  73.86411 | 0.1718660 |
-| Surface.water.kg   |   16 | 402 | 0.1281632 |  1.0648699 | 0.0000000 | 0.0003837 | 0.0000000 |   0 |  16.404607 |  16.404607 | 12.738129 | 175.01346 | 0.0531109 |
-| U\_ground.Water.kg |   17 | 402 | 0.0643912 |  0.5634316 | 0.0000000 | 0.0000000 | 0.0000000 |   0 |   8.839104 |   8.839104 | 12.131672 | 164.85908 | 0.0281014 |
-| Land.kg            |   18 | 402 | 0.3012675 |  3.2804508 | 0.0000000 | 0.0003429 | 0.0000000 |   0 |  59.730055 |  59.730055 | 15.784280 | 271.04069 | 0.1636140 |
-| Offiste.kg         |   19 | 402 | 0.1176076 |  0.9913416 | 0.0000885 | 0.0029975 | 0.0001312 |   0 |  18.394299 |  18.394299 | 16.006124 | 285.75539 | 0.0494436 |
-| POTW.Metal.kg      |   20 | 402 | 0.0007064 |  0.0036614 | 0.0000000 | 0.0000332 | 0.0000000 |   0 |   0.040218 |   0.040218 |  7.481724 |  61.88361 | 0.0001826 |
+|                    | vars |   n |         mean |           sd |  median |      trimmed |        mad | min |       max |     range |      skew |  kurtosis |           se |
+| :----------------- | ---: | --: | -----------: | -----------: | ------: | -----------: | ---------: | --: | --------: | --------: | --------: | --------: | -----------: |
+| CO.g               |    1 | 402 |   22214.7438 |   295207.762 |    38.5 | 6.645031e+02 |    57.0801 |   0 |   5888105 |   5888105 | 19.523839 | 384.79885 |   14723.6250 |
+| NH3.g              |    2 | 402 |    9829.9876 |   138921.135 |     1.0 | 8.649068e+00 |     1.4826 |   0 |   2687352 |   2687352 | 18.084851 | 341.44049 |    6928.7564 |
+| NOx.g              |    3 | 402 |    8035.9080 |    54044.815 |    28.0 | 3.363199e+02 |    41.5128 |   0 |    707607 |    707607 |  9.977676 | 106.60356 |    2695.5104 |
+| PM10.g             |    4 | 402 |   17716.5000 |   285050.372 |     5.5 | 1.408199e+02 |     8.1543 |   0 |   5695606 |   5695606 | 19.666983 | 388.60310 |   14217.0204 |
+| PM2.5.g            |    5 | 402 |    4723.6443 |    69454.677 |     4.0 | 7.199689e+01 |     5.9304 |   0 |   1382822 |   1382822 | 19.453251 | 382.59517 |    3464.0845 |
+| SO2.g              |    6 | 402 |    5711.2488 |    55906.619 |    14.0 | 2.276739e+02 |    20.7564 |   0 |   1082028 |   1082028 | 17.908593 | 339.19226 |    2788.3687 |
+| VOC.g              |    7 | 402 |    4737.9104 |    40628.764 |    22.5 | 2.172981e+02 |    33.3585 |   0 |    723802 |    723802 | 15.184308 | 251.89230 |    2026.3786 |
+| Total.g.CO2e       |    8 | 402 | 3816211.4975 | 30772366.891 | 17144.5 | 1.191106e+05 | 25197.5283 |   0 | 512173950 | 512173950 | 13.299869 | 198.03556 | 1534786.1634 |
+| CO2.Fossil.g.CO2e  |    9 | 402 | 1834585.9353 | 14412095.613 | 16962.5 | 9.019479e+04 | 24927.6951 |   0 | 257559803 | 257559803 | 14.832228 | 248.47182 |  718809.9963 |
+| CO2.Process.g.CO2e |   10 | 402 |  124910.3731 |  1301289.377 |     0.0 | 0.000000e+00 |     0.0000 |   0 |  18929557 |  18929557 | 12.407185 | 160.89258 |   64902.4151 |
+| CH4.g.CO2e         |   11 | 402 |  545257.2090 |  5900697.887 |     0.0 | 0.000000e+00 |     0.0000 |   0 | 108460987 | 108460987 | 15.916464 | 278.74807 |  294300.0616 |
+| HFC.PFCs.g.CO2e    |   12 | 402 |   21954.0572 |   250994.325 |     0.0 | 0.000000e+00 |     0.0000 |   0 |   4161163 |   4161163 | 13.617934 | 201.14719 |   12518.4591 |
+| Fugitive.mg        |   13 | 402 |  122187.4279 |   915621.053 |   156.0 | 3.679661e+03 |   231.2856 |   0 |  12189404 |  12189404 | 11.026986 | 130.43964 |   45667.0275 |
+| Stack.mg           |   14 | 402 |  420683.3582 |  2733120.398 |   309.0 | 9.008301e+03 |   458.1234 |   0 |  33321666 |  33321666 |  8.712720 |  82.72182 |  136315.6557 |
+| Total.Air.mg       |   15 | 402 |  542871.1891 |  3445903.489 |   567.5 | 1.356760e+04 |   841.3755 |   0 |  37092916 |  37092916 |  8.377980 |  73.86411 |  171866.0451 |
+| Surface.water.mg   |   16 | 402 |  128163.1841 |  1064869.900 |     0.0 | 3.836894e+02 |     0.0000 |   0 |  16404607 |  16404607 | 12.738129 | 175.01346 |   53110.8833 |
+| U\_ground.Water.mg |   17 | 402 |   64391.2164 |   563431.638 |     0.0 | 0.000000e+00 |     0.0000 |   0 |   8839104 |   8839104 | 12.131672 | 164.85908 |   28101.4159 |
+| Land.mg            |   18 | 402 |  301267.4900 |  3280450.751 |     0.0 | 3.429286e+02 |     0.0000 |   0 |  59730055 |  59730055 | 15.784280 | 271.04069 |  163614.0125 |
+| Offiste.mg         |   19 | 402 |  117607.6294 |   991341.570 |    88.5 | 2.997488e+03 |   131.2101 |   0 |  18394299 |  18394299 | 16.006124 | 285.75539 |   49443.6236 |
+| POTW.Metal.mg      |   20 | 402 |     706.3532 |     3661.431 |     0.0 | 3.324224e+01 |     0.0000 |   0 |     40218 |     40218 |  7.481724 |  61.88361 |     182.6156 |
+
+``` r
+psych::pairs.panels(resource %>% cbind(dat$SO2.g), 
+                    method = "spearman")
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+``` r
+psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)), 
+                    method = "spearman")
+```
+
+<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
 
 # Clustering for the data
 
-# Fit Models
+# Regression
 
 ## user-define function
 
 ``` r
-# test: target_nm = "CO.t"
-makedata_map <- function(target_nm, dat){
-  # Input columns
-  Xy = dat %>%
-    select(Coal.TJ, NatGase.TJ, Petrol.TJ, 
-           Bio.Waste.TJ, NonFossElec.TJ, 
-           Water.Withdrawals.Kgal,
-           target_nm)
-  # retin all inf by log(x + min/100)
-  #Xy <- cbind(dat %>% select(Sector) %>% mutate(Sector= Sector %>% as.factor()), log10(Xy + min(Xy[Xy!=0])/100)) 
-  # remove all inf= log(0)
-  Xy <- cbind(dat %>% select(Sector), log(Xy)) 
-  Xy <- Xy[!is.infinite(rowSums(Xy)),] %>% mutate(Sector= Sector %>% as.factor())
+# test: target_nm = "CO.g",  X = resource
+makedata_map <- function(target_nm, dat, X){
+  # loglog transform
+  y <- dat %>% select(target_nm)
+  Lny <- log(y) %>% stats::setNames(paste0("Ln", names(.)))
+  LnX <- log(X+1) %>% stats::setNames(paste0("Ln", names(.)))
+  # combine, filter log(y)=0; add ID:Sector
+  Xy <- cbind(LnX, Lny)
+  Xy <- cbind(dat %>% select(Sector), Xy) 
+  Xy <- Xy[!is.infinite(rowSums(Lny)),] %>% mutate(Sector= Sector %>% as.factor())
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
+}
+# bestglm
+fit_model <- function(data){
+  best_model <- bestglm::bestglm(Xy=data %>% 
+                                   select_if(is.numeric), 
+                                 family = gaussian, 
+                                 method = "exhaustive", 
+                                 IC = "AIC", 
+                                 TopModels = 1)
+  return(best_model[[1]])
 }
 bind_coef_star <- function(x) {
   if (stringr::str_detect(x[2] , "\\*")) {
@@ -184,45 +268,46 @@ waldtest_map <- function(model, null= NULL){
 ``` r
 # create a dataframe with a column with impact variable names 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list %>% flatten() %>% unlist()
-#>  [1] "CO.t"               "NH3.t"              "NOx.t"             
-#>  [4] "PM10.t"             "PM2.5.t"            "SO2.t"             
-#>  [7] "VOC.t"              "Total.t.CO2e"       "CO2.Fossil.t.CO2e" 
-#> [10] "CO2.Process.t.CO2e" "CH4.t.CO2e"         "HFC.PFCs.t.CO2e"   
-#> [13] "Fugitive.kg"        "Stack.kg"           "Total.Air.kg"      
-#> [16] "Surface.water.kg"   "U_ground.Water.kg"  "Land.kg"           
-#> [19] "Offiste.kg"         "POTW.Metal.kg"
+#>  [1] "CO.g"               "NH3.g"              "NOx.g"             
+#>  [4] "PM10.g"             "PM2.5.g"            "SO2.g"             
+#>  [7] "VOC.g"              "Total.g.CO2e"       "CO2.Fossil.g.CO2e" 
+#> [10] "CO2.Process.g.CO2e" "CH4.g.CO2e"         "HFC.PFCs.g.CO2e"   
+#> [13] "Fugitive.mg"        "Stack.mg"           "Total.Air.mg"      
+#> [16] "Surface.water.mg"   "U_ground.Water.mg"  "Land.mg"           
+#> [19] "Offiste.mg"         "POTW.Metal.mg"
 
 # model selection for each impact variable
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
            map(function(target_nm) makedata_map(target_nm,
-                                                dat= dat))) %>% 
+                                                dat= dat, 
+                                                X = resource))) %>% 
   mutate(rowdata = data %>% map_dbl(nrow)) %>% 
   filter(rowdata > 100) %>% 
   select(-rowdata) %>% 
-  mutate(top_model = data %>% 
-           map(function(data) bestglm::bestglm(Xy=data %>% select_if(is.numeric), family = gaussian, method = "exhaustive", IC = "BIC", TopModels = 1))) %>% 
-  mutate(best_model = top_model %>% map(function(top_model) top_model[[1]])) %>% 
+  mutate(best_model = data %>% map(fit_model)) %>% 
   mutate(anv = best_model %>% map(anova)) %>% 
   mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
   tidyr::unnest(statisics) %>% 
   mutate(wald_pval = best_model %>% 
-                          purrr::map_dbl(function(model) waldtest_map(model= model, null= 1)))
-# extract coefficient from the best model of each impact variable
+           purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
+  mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
+  arrange(desc(r.squared))
+
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, estimate) %>% 
   tidyr::spread(key= term, value = estimate)
-# extract p-value for each paramters of the best model of each impact variable
+
 signif_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
-# combind coefficient and p-value to result in a tidy table of the result
+
 datArray <- abind::abind(coef_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, signif, digits = 3) %>% 
@@ -231,37 +316,35 @@ datArray <- abind::abind(coef_list %>%
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
 coef_signif_list <- bestglm_list %>% 
-  select(target, wald_pval, r.squared, adj.r.squared, p.value) %>% 
-  mutate_at(c("r.squared", "wald_pval", "adj.r.squared", "p.value"), signif, digits = 3) %>% 
+  select(target, adj.r.squared, p.value, wald_pval) %>% 
+  mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
 
-coef_signif_list$sum_elastic <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+
 
 # result
-coef_signif_list %>% 
-  select(target, sum_elastic, wald_pval, everything()) %>% 
-  arrange(desc(adj.r.squared)) %>%
-  knitr::kable(format = "markdown") 
+coef_signif_list %>% knitr::kable(format = "markdown") 
 ```
 
-| target            | sum\_elastic | wald\_pval | r.squared | adj.r.squared | p.value | (Intercept)    | BioWasteTJ    | CoalTJ        | NatGaseTJ     | NonFossElecTJ | PetrolTJ      | WaterWithdrawalsKgal |
-| :---------------- | -----------: | ---------: | --------: | ------------: | ------: | :------------- | :------------ | :------------ | :------------ | :------------ | :------------ | :------------------- |
-| CO2.Fossil.t.CO2e |        0.906 |   0.00e+00 |     0.991 |         0.991 |       0 | \-2.48(\*\*\*) | 0.262(\*\*\*) | 0.237(\*\*\*) | 0.658(\*\*\*) | \-0.252(\*)   |               |                      |
-| Total.t.CO2e      |        0.923 |   0.00e+00 |     0.983 |         0.982 |       0 | \-1.6(\*\*\*)  | 0.244(\*\*\*) | 0.334(\*\*\*) | 0.573(\*\*\*) | \-0.229(\*)   |               |                      |
-| SO2.t             |        0.988 |   0.00e+00 |     0.928 |         0.927 |       0 | \-0.76(\*\*)   | 0.18(\*\*\*)  | 0.172(\*\*)   | 0.636(\*\*\*) |               |               |                      |
-| NOx.t             |        1.100 |   0.00e+00 |     0.912 |         0.910 |       0 | 3.39(\*\*\*)   |               |               |               | 1.1(\*\*\*)   |               |                      |
-| PM10.t            |        0.847 |   0.00e+00 |     0.889 |         0.886 |       0 | 0.842          |               | 0.847(\*\*\*) |               |               |               |                      |
-| PM2.5.t           |        0.962 |   0.00e+00 |     0.878 |         0.875 |       0 | \-4.38(\*\*\*) | 0.237(\*\*)   |               | 0.725(\*\*\*) |               |               |                      |
-| NH3.t             |        1.020 |   0.00e+00 |     0.768 |         0.764 |       0 | 5.29(\*\*\*)   |               | 0.141(\*\*\*) | 0.68(\*\*\*)  |               | 0.195(\*\*\*) |                      |
-| CO.t              |        0.951 |   0.00e+00 |     0.751 |         0.748 |       0 | \-0.948(\*)    | 0.275(\*\*\*) |               | 0.676(\*\*\*) |               |               |                      |
-| VOC.t             |        1.070 |   0.00e+00 |     0.691 |         0.686 |       0 | 2.74(\*\*\*)   |               |               |               | 1.07(\*\*\*)  |               |                      |
-| Total.Air.kg      |        1.230 |   0.00e+00 |     0.670 |         0.665 |       0 | 5.2(\*\*\*)    |               |               |               | 1.23(\*\*\*)  |               |                      |
-| Fugitive.kg       |        0.890 |   1.70e-01 |     0.640 |         0.638 |       0 | \-2.31(\*\*)   |               |               |               | 0.89(\*\*\*)  |               |                      |
-| Surface.water.kg  |        1.500 |   1.93e-05 |     0.623 |         0.619 |       0 | 2.97(\*\*\*)   |               |               | 1.5(\*\*\*)   |               |               |                      |
-| Stack.kg          |        1.050 |   9.06e-03 |     0.595 |         0.592 |       0 | 0.945(\*\*\*)  |               | 0.533(\*\*\*) | 0.166(\*)     |               | 0.35(\*\*\*)  |                      |
-| POTW.Metal.kg     |        0.969 |   2.28e-01 |     0.487 |         0.482 |       0 | \-1.03(\*)     | 0.215(\*\*)   |               |               | 0.755(\*\*\*) |               |                      |
-| Offiste.kg        |        1.040 |   4.55e-01 |     0.485 |         0.481 |       0 | 5.8(\*\*\*)    |               | 0.165(\*\*\*) | 0.707(\*\*\*) |               | 0.204(\*\*\*) | \-0.0377(\*)         |
-| Land.kg           |        1.150 |   7.41e-02 |     0.466 |         0.461 |       0 | 5.65(\*\*\*)   |               |               |               | 0.9(\*\*\*)   | 0.249(\*\*)   |                      |
+| target            | adj.r.squared | p.value | wald\_pval | (Intercept)     | LnBioWasteMJ  | LnCoalMJ       | LnNatGaseMJ   | LnNonFossElecMJ | LnPetrolMJ    | LnWaterWithdrawalsKgal | exponent\_sum |
+| :---------------- | ------------: | ------: | ---------: | :-------------- | :------------ | :------------- | :------------ | :-------------- | :------------ | :--------------------- | ------------: |
+| CO2.Fossil.g.CO2e |         0.921 |       0 |          0 | \-0.234         | 0.145(\*\*\*) |                |               | 0.431(\*\*\*)   | 0.534(\*\*\*) |                        |         1.110 |
+| Total.g.CO2e      |         0.918 |       0 |          0 | 4.35(\*\*\*)    | 0.0418        |                | 0.268(\*\*\*) | 0.414(\*\*\*)   | 0.479(\*\*\*) |                        |         1.200 |
+| NOx.g             |         0.774 |       0 |          0 | 1.35(\*\*)      | 0.388(\*\*\*) |                |               | 0.622(\*\*\*)   | \-0.116       | 0.175(\*)              |         1.070 |
+| SO2.g             |         0.766 |       0 |          0 | \-0.368         |               | 0.229(\*)      | \-0.403       | 0.711(\*\*\*)   | 0.321(\*)     | 0.245(\*)              |         1.100 |
+| CO.g              |         0.656 |       0 |          0 | \-3.89(\*\*\*)  | 0.148(\*\*)   | \-0.165(\*\*)  |               | 0.345(\*\*\*)   | 0.389(\*\*\*) | 0.178(\*\*\*)          |         0.896 |
+| Fugitive.mg       |         0.648 |       0 |          0 | \-0.745(\*\*\*) | 0.164(\*\*\*) |                | 0.0932        | 0.348(\*\*\*)   | 0.541(\*\*\*) |                        |         1.150 |
+| PM10.g            |         0.647 |       0 |          0 | 1.55(\*\*\*)    |               | 0.118          | 0.339(\*)     | 0.792(\*\*\*)   | \-0.228(\*\*) |                        |         1.020 |
+| PM2.5.g           |         0.646 |       0 |          0 | \-1.71(\*\*\*)  | 0.225(\*\*\*) |                |               | 0.136           | 0.539(\*\*\*) | 0.147(\*\*)            |         1.050 |
+| Total.Air.mg      |         0.628 |       0 |          0 | \-1.56(\*\*\*)  | 0.21(\*\*\*)  |                |               | 0.149(\*)       | 0.509(\*\*\*) | 0.108(\*)              |         0.976 |
+| VOC.g             |         0.600 |       0 |          0 | 0.28            | 0.269(\*\*\*) |                |               | 0.519(\*\*\*)   |               |                        |         0.788 |
+| Stack.mg          |         0.580 |       0 |          0 | \-0.566(\*)     | 0.221(\*\*\*) | 0.245(\*\*\*)  |               | 0.204(\*\*\*)   | 0.526(\*\*\*) |                        |         1.200 |
+| NH3.g             |         0.544 |       0 |          0 | 3.12(\*\*\*)    | 0.417(\*\*\*) | 0.151          | 0.31          | 0.451(\*\*)     | \-0.211(\*)   |                        |         1.120 |
+| Surface.water.mg  |         0.541 |       0 |          0 | \-2.76(\*\*)    |               |                | 0.675(\*\*\*) |                 | 0.199         | 0.293(\*\*)            |         1.170 |
+| Offiste.mg        |         0.535 |       0 |          0 | 3.82(\*\*\*)    | 0.438(\*\*\*) | 0.142          | 0.256         | 0.441(\*\*)     | \-0.168(\*)   |                        |         1.110 |
+| Land.mg           |         0.476 |       0 |          0 | 4.12(\*\*\*)    | 0.0373        | \-0.0822(\*\*) | 0.32(\*\*\*)  | 0.442(\*\*\*)   | 0.508(\*\*\*) |                        |         1.230 |
+| POTW.Metal.mg     |         0.466 |       0 |          0 | \-0.119         | 0.249(\*\*\*) | \-0.137(\*\*)  |               | 0.471(\*\*\*)   | 0.358(\*\*\*) |                        |         0.941 |
 
 # Communciate and visualize the results
 
@@ -270,55 +353,18 @@ coef_signif_list %>%
 ``` r
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
 good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% unlist
-#> [1] "CO2.Fossil.t.CO2e" "Total.t.CO2e"      "SO2.t"            
-#> [4] "NOx.t"             "PM10.t"            "PM2.5.t"          
-#> [7] "NH3.t"
+#> [1] "CO2.Fossil.g.CO2e" "Total.g.CO2e"      "NOx.g"            
+#> [4] "SO2.g"
 ```
 
 ## The diagnosis of linear model
 
 ``` r
 par(mfrow=c(2,3))
-plot(good_lm$best_model[[1]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
-
-``` r
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-2.png" width="100%" />
-
-``` r
-plot(good_lm$best_model[[3]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-3.png" width="100%" />
-
-``` r
-plot(good_lm$best_model[[4]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-4.png" width="100%" />
-
-``` r
-plot(good_lm$best_model[[5]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-5.png" width="100%" />
-
-``` r
-plot(good_lm$best_model[[6]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-6.png" width="100%" />
-
-``` r
-plot(good_lm$best_model[[7]], which=1:6)
-```
-
-<img src="man/figures/README-unnamed-chunk-9-7.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 # Result
 
@@ -327,37 +373,16 @@ plot(good_lm$best_model[[7]], which=1:6)
 ``` r
 # descriptive analysis
 good_lm$target
-#> [1] "NH3.t"             "NOx.t"             "PM10.t"           
-#> [4] "PM2.5.t"           "SO2.t"             "Total.t.CO2e"     
-#> [7] "CO2.Fossil.t.CO2e"
+#> [1] "CO2.Fossil.g.CO2e" "Total.g.CO2e"      "NOx.g"            
+#> [4] "SO2.g"
 # NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
 # SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
 # Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
 # CO2.Fossil.t.CO2e C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
 par(mfrow=c(1,2))
-plot(good_lm$data[[1]][,ncol(good_lm$data[[1]])])
-plot(good_lm$data[[1]][,1], good_lm$data[[1]][,ncol(good_lm$data[[1]])])
+i=2
+good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
+plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
-
-``` r
-plot(good_lm$data[[2]][,ncol(good_lm$data[[2]])])
-plot(good_lm$data[[2]][,1], good_lm$data[[2]][,ncol(good_lm$data[[2]])])
-```
-
-<img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
-
-``` r
-plot(good_lm$data[[3]][,ncol(good_lm$data[[3]])])
-plot(good_lm$data[[3]][,1], good_lm$data[[3]][,ncol(good_lm$data[[3]])])
-```
-
-<img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
-
-``` r
-plot(good_lm$data[[4]][,ncol(good_lm$data[[4]])])
-plot(good_lm$data[[4]][,1], good_lm$data[[4]][,ncol(good_lm$data[[4]])])
-```
-
-<img src="man/figures/README-unnamed-chunk-10-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />

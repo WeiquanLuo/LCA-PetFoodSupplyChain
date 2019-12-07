@@ -214,55 +214,20 @@ psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)),
 <img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
 
 ``` r
-# Define the number of colors you want
-nb.cols <- dat$Sector %>% unique() %>% length()
-mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
-
-p <- plot_ly(dat, 
-             x = ~NonFossElec.MJ, 
-             y = ~Petrol.MJ, 
-             z = ~NatGase.MJ,
-             color = ~Sector, 
-             colors = mycolors,
-             marker = list(symbol = 'circle',
-                           sizemode = 'diameter',
-                           size = ~ Total.g.CO2e*10^-6),
-             text = ~paste('Sector:', Sector, 
-                           '<br>Description:', Description, 
-                           '<br>name_sub:', name_sub,
-                           '<br>Sector_sub:', Sector_sub, 
-                           '<br>Total.t.CO2e', Total.g.CO2e)) %>%
-  layout(title = 'Total CO2 equivalent vs Energy source (NonFossElec, Petrol, NatGase) <br> by NAICS 2002 Sectors',
-         scene = list(xaxis = list(title = 'NonFossElec.MJ',
-                                   gridcolor = 'rgb(255, 255, 255)',
-                                   type = 'log'),
-                      yaxis = list(title = 'Petrol.MJ',
-                                   gridcolor = 'rgb(255, 255, 255)',
-                                   type = 'log'),
-                      zaxis = list(title = 'NatGase.MJ',
-                                   gridcolor = 'rgb(255, 255, 255)',
-                                   type = 'log')),
-         paper_bgcolor = 'rgb(243, 243, 243)',
-         plot_bgcolor = 'rgb(243, 243, 243)',
-         annotations = list(x = 1.07,
-                            y = 1.015,
-                            text = 'Sector by NAICS 2002',
-                            showarrow = FALSE
-         ))
-api_create(p, filename = "few_GHG_example")
-#> No trace type specified:
-#>   Based on info supplied, a 'scatter3d' trace seems appropriate.
-#>   Read more about this trace type -> https://plot.ly/r/reference/#scatter3d
-#> No scatter3d mode specifed:
-#>   Setting the mode to markers
-#>   Read more about this attribute -> https://plot.ly/r/reference/#scatter-mode
-#> Found a grid already named: 'few_GHG_example Grid'. Since fileopt='overwrite', I'll try to update it
-#> Found a plot already named: 'few_GHG_example'. Since fileopt='overwrite', I'll try to update it
+library("knitr")
+library("devtools")
+#> Loading required package: usethis
+url<-"https://plot.ly/~weiquanluo/1/.embed?width=550&height=550" 
+plotly_iframe <- paste("<center><iframe scrolling='no' seamless='seamless' style='border:none' src='", url, "/800/1200' width='800' height='1200'></iframe></center>", sep = "")
 ```
 
-<iframe src="https://plot.ly/~weiquanluo/1.embed" width="800" height="600" id="igraph" scrolling="no" seamless="seamless" frameBorder="0">
+<center>
+
+<iframe scrolling="no" seamless="seamless" style="border:none" src="https://plot.ly/~weiquanluo/1/.embed?width=550&amp;height=550/800/1200" width="800" height="1200">
 
 </iframe>
+
+</center>
 
 # Clustering for the data
 

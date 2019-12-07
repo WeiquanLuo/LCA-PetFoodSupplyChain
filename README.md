@@ -169,7 +169,7 @@ TOX <- dat %>% select(Fugitive.kg, Stack.kg, Total.Air.kg, Surface.water.kg, U_g
   calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.kg", replacement= ".mg")
 resource <- dat %>% select(Coal.TJ, NatGase.TJ, Petrol.TJ,Bio.Waste.TJ, NonFossElec.TJ, Water.Withdrawals.Kgal) %>% 
   calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.TJ", replacement= ".MJ")
-ID <- dat %>% select(Sector, Description, name_sub, Sector_sub)
+ID <- dat %>% select(Sector, Description, name_sub, Sector_sub) %>% mutate_all(is.factor)
 dat <- cbind(ID, CPA, GHG, TOX, resource)
 
 ys <- cbind(CPA, GHG, TOX)
@@ -229,7 +229,7 @@ makedata_map <- function(target_nm, dat, X){
   # combine, filter log(y)=0; add ID:Sector
   Xy <- cbind(LnX, Lny)
   Xy <- cbind(dat %>% select(Sector), Xy) 
-  Xy <- Xy[!is.infinite(rowSums(Lny)),] %>% mutate(Sector= Sector %>% as.factor())
+  Xy <- Xy[!is.infinite(rowSums(Lny)),]
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }

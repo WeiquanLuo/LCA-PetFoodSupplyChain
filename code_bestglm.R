@@ -169,8 +169,10 @@ plot(good_lm$best_model[[4]], which=1:6)
 dev.off()
 
 par(mfrow=c(2,3))
-i=7
+i=2
 plot(bestglm_list$best_model[[i]], which=1:6); bestglm_list[i,]
+
+car::crPlots(bestglm_list$best_model[[i]])
 
 # descriptive analysis
 good_lm$target

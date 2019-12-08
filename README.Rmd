@@ -190,7 +190,7 @@ bestglm_list <- target_list %>%
   mutate(wald_pval = best_model %>% 
            purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
   mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
-  arrange(desc(r.squared))
+  arrange(desc(adj.r.squared))
 # extract coef from each model
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -206,18 +206,21 @@ signif_list <- bestglm_list %>%
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
 # combind coef and pval for visual
-datArray <- abind::abind(coef_list %>% 
-                           select(-target) %>% 
-                           mutate_if(is.numeric, signif, digits = 3) %>% 
-                           mutate_all(as.character),
-                         signif_list %>% 
-                           select(-target) %>% 
-                           mutate_if(is.numeric, gtools::stars.pval),along=3)
+coef_signif_list <- coef_list %>% 
+  select(target) %>% 
+  cbind(apply(abind::abind(coef_list %>% 
+                             select(-target) %>% 
+                             mutate_if(is.numeric, signif, digits = 3) %>% 
+                             mutate_all(as.character),
+                           signif_list %>% 
+                             select(-target) %>% 
+                             mutate_if(is.numeric, gtools::stars.pval),along=3),
+              1:2, bind_coef_star))
 # add statistic to the coef and pval
 coef_signif_list <- bestglm_list %>% 
   select(target, adj.r.squared, p.value, wald_pval) %>% 
   mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
-  cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
+  left_join(coef_signif_list, by="target")
 # get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
@@ -225,7 +228,9 @@ coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% s
 
 ```{r}
 # result
-coef_signif_list %>% knitr::kable(format = "markdown") 
+coef_signif_list %>% 
+  arrange(desc(adj.r.squared)) %>% 
+  knitr::kable(format = "markdown") 
 ```
 
 ## 2.3 The diagnosis of linear model
@@ -240,6 +245,10 @@ For instance, check diagnosis for model of CO2 Equvivalent:
 ```{r}
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
+```
+Check partial-residual plots for each independent variable
+```{r}
+car::crPlots(bestglm_list$best_model[[2]])
 ```
 
 # 3. Clustering

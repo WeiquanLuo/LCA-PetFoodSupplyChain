@@ -272,7 +272,7 @@ bestglm_list <- target_list %>%
   mutate(wald_pval = best_model %>% 
            purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
   mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
-  arrange(desc(r.squared))
+  arrange(desc(adj.r.squared))
 # extract coef from each model
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
@@ -288,45 +288,50 @@ signif_list <- bestglm_list %>%
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
 # combind coef and pval for visual
-datArray <- abind::abind(coef_list %>% 
-                           select(-target) %>% 
-                           mutate_if(is.numeric, signif, digits = 3) %>% 
-                           mutate_all(as.character),
-                         signif_list %>% 
-                           select(-target) %>% 
-                           mutate_if(is.numeric, gtools::stars.pval),along=3)
+coef_signif_list <- coef_list %>% 
+  select(target) %>% 
+  cbind(apply(abind::abind(coef_list %>% 
+                             select(-target) %>% 
+                             mutate_if(is.numeric, signif, digits = 3) %>% 
+                             mutate_all(as.character),
+                           signif_list %>% 
+                             select(-target) %>% 
+                             mutate_if(is.numeric, gtools::stars.pval),along=3),
+              1:2, bind_coef_star))
 # add statistic to the coef and pval
 coef_signif_list <- bestglm_list %>% 
   select(target, adj.r.squared, p.value, wald_pval) %>% 
   mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
-  cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
+  left_join(coef_signif_list, by="target")
 # get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
 
 ``` r
 # result
-coef_signif_list %>% knitr::kable(format = "markdown") 
+coef_signif_list %>% 
+  arrange(desc(adj.r.squared)) %>% 
+  knitr::kable(format = "markdown") 
 ```
 
 | target            | adj.r.squared | p.value | wald\_pval | (Intercept)     | LnBioWasteMJ  | LnCoalMJ       | LnNatGaseMJ   | LnNonFossElecMJ | LnPetrolMJ    | LnWaterWithdrawalsKgal | exponent\_sum |
 | :---------------- | ------------: | ------: | ---------: | :-------------- | :------------ | :------------- | :------------ | :-------------- | :------------ | :--------------------- | ------------: |
-| CO2.Fossil.g.CO2e |         0.921 |       0 |          0 | \-0.234         | 0.145(\*\*\*) |                |               | 0.431(\*\*\*)   | 0.534(\*\*\*) |                        |         1.110 |
-| Total.g.CO2e      |         0.918 |       0 |          0 | 4.35(\*\*\*)    | 0.0418        |                | 0.268(\*\*\*) | 0.414(\*\*\*)   | 0.479(\*\*\*) |                        |         1.200 |
-| NOx.g             |         0.774 |       0 |          0 | 1.35(\*\*)      | 0.388(\*\*\*) |                |               | 0.622(\*\*\*)   | \-0.116       | 0.175(\*)              |         1.070 |
-| SO2.g             |         0.766 |       0 |          0 | \-0.368         |               | 0.229(\*)      | \-0.403       | 0.711(\*\*\*)   | 0.321(\*)     | 0.245(\*)              |         1.100 |
-| CO.g              |         0.656 |       0 |          0 | \-3.89(\*\*\*)  | 0.148(\*\*)   | \-0.165(\*\*)  |               | 0.345(\*\*\*)   | 0.389(\*\*\*) | 0.178(\*\*\*)          |         0.896 |
-| Fugitive.mg       |         0.648 |       0 |          0 | \-0.745(\*\*\*) | 0.164(\*\*\*) |                | 0.0932        | 0.348(\*\*\*)   | 0.541(\*\*\*) |                        |         1.150 |
-| PM10.g            |         0.647 |       0 |          0 | 1.55(\*\*\*)    |               | 0.118          | 0.339(\*)     | 0.792(\*\*\*)   | \-0.228(\*\*) |                        |         1.020 |
-| PM2.5.g           |         0.646 |       0 |          0 | \-1.71(\*\*\*)  | 0.225(\*\*\*) |                |               | 0.136           | 0.539(\*\*\*) | 0.147(\*\*)            |         1.050 |
-| Total.Air.mg      |         0.628 |       0 |          0 | \-1.56(\*\*\*)  | 0.21(\*\*\*)  |                |               | 0.149(\*)       | 0.509(\*\*\*) | 0.108(\*)              |         0.976 |
-| VOC.g             |         0.600 |       0 |          0 | 0.28            | 0.269(\*\*\*) |                |               | 0.519(\*\*\*)   |               |                        |         0.788 |
-| Stack.mg          |         0.580 |       0 |          0 | \-0.566(\*)     | 0.221(\*\*\*) | 0.245(\*\*\*)  |               | 0.204(\*\*\*)   | 0.526(\*\*\*) |                        |         1.200 |
-| NH3.g             |         0.544 |       0 |          0 | 3.12(\*\*\*)    | 0.417(\*\*\*) | 0.151          | 0.31          | 0.451(\*\*)     | \-0.211(\*)   |                        |         1.120 |
+| CO2.Fossil.g.CO2e |         0.921 |       0 |          0 | 4.35(\*\*\*)    | 0.0418        |                | 0.268(\*\*\*) | 0.414(\*\*\*)   | 0.479(\*\*\*) |                        |         1.110 |
+| Total.g.CO2e      |         0.918 |       0 |          0 | 4.12(\*\*\*)    | 0.0373        | \-0.0822(\*\*) | 0.32(\*\*\*)  | 0.442(\*\*\*)   | 0.508(\*\*\*) |                        |         1.200 |
+| NOx.g             |         0.774 |       0 |          0 | \-0.745(\*\*\*) | 0.164(\*\*\*) |                | 0.0932        | 0.348(\*\*\*)   | 0.541(\*\*\*) |                        |         1.070 |
+| SO2.g             |         0.766 |       0 |          0 | \-0.566(\*)     | 0.221(\*\*\*) | 0.245(\*\*\*)  |               | 0.204(\*\*\*)   | 0.526(\*\*\*) |                        |         1.100 |
+| CO.g              |         0.656 |       0 |          0 | \-0.234         | 0.145(\*\*\*) |                |               | 0.431(\*\*\*)   | 0.534(\*\*\*) |                        |         0.896 |
+| Fugitive.mg       |         0.648 |       0 |          0 | 1.35(\*\*)      | 0.388(\*\*\*) |                |               | 0.622(\*\*\*)   | \-0.116       | 0.175(\*)              |         1.150 |
+| PM10.g            |         0.647 |       0 |          0 | \-1.71(\*\*\*)  | 0.225(\*\*\*) |                |               | 0.136           | 0.539(\*\*\*) | 0.147(\*\*)            |         1.020 |
+| PM2.5.g           |         0.646 |       0 |          0 | \-1.56(\*\*\*)  | 0.21(\*\*\*)  |                |               | 0.149(\*)       | 0.509(\*\*\*) | 0.108(\*)              |         1.050 |
+| Total.Air.mg      |         0.628 |       0 |          0 | 3.82(\*\*\*)    | 0.438(\*\*\*) | 0.142          | 0.256         | 0.441(\*\*)     | \-0.168(\*)   |                        |         0.976 |
+| VOC.g             |         0.600 |       0 |          0 | \-0.119         | 0.249(\*\*\*) | \-0.137(\*\*)  |               | 0.471(\*\*\*)   | 0.358(\*\*\*) |                        |         0.788 |
+| Stack.mg          |         0.580 |       0 |          0 | 3.12(\*\*\*)    | 0.417(\*\*\*) | 0.151          | 0.31          | 0.451(\*\*)     | \-0.211(\*)   |                        |         1.200 |
+| NH3.g             |         0.544 |       0 |          0 | \-3.89(\*\*\*)  | 0.148(\*\*)   | \-0.165(\*\*)  |               | 0.345(\*\*\*)   | 0.389(\*\*\*) | 0.178(\*\*\*)          |         1.120 |
 | Surface.water.mg  |         0.541 |       0 |          0 | \-2.76(\*\*)    |               |                | 0.675(\*\*\*) |                 | 0.199         | 0.293(\*\*)            |         1.170 |
-| Offiste.mg        |         0.535 |       0 |          0 | 3.82(\*\*\*)    | 0.438(\*\*\*) | 0.142          | 0.256         | 0.441(\*\*)     | \-0.168(\*)   |                        |         1.110 |
-| Land.mg           |         0.476 |       0 |          0 | 4.12(\*\*\*)    | 0.0373        | \-0.0822(\*\*) | 0.32(\*\*\*)  | 0.442(\*\*\*)   | 0.508(\*\*\*) |                        |         1.230 |
-| POTW.Metal.mg     |         0.466 |       0 |          0 | \-0.119         | 0.249(\*\*\*) | \-0.137(\*\*)  |               | 0.471(\*\*\*)   | 0.358(\*\*\*) |                        |         0.941 |
+| Offiste.mg        |         0.535 |       0 |          0 | 1.55(\*\*\*)    |               | 0.118          | 0.339(\*)     | 0.792(\*\*\*)   | \-0.228(\*\*) |                        |         1.110 |
+| Land.mg           |         0.476 |       0 |          0 | \-0.368         |               | 0.229(\*)      | \-0.403       | 0.711(\*\*\*)   | 0.321(\*)     | 0.245(\*)              |         1.230 |
+| POTW.Metal.mg     |         0.466 |       0 |          0 | 0.28            | 0.269(\*\*\*) |                |               | 0.519(\*\*\*)   |               |                        |         0.941 |
 
 ## 2.3 The diagnosis of linear model
 
@@ -347,6 +352,13 @@ plot(good_lm$best_model[[2]], which=1:6)
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+Check partial-residual plots for each independent variable
+
+``` r
+car::crPlots(bestglm_list$best_model[[2]])
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 # 3\. Clustering
 
@@ -369,4 +381,4 @@ good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />

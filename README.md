@@ -198,21 +198,9 @@ psych::pairs.panels(log(resource+1),
 Let’s take CO2 Equvivalent as the target variable, resource as input
 variables as example for visulization:
 
-``` r
-library("knitr")
-library("devtools")
-#> Loading required package: usethis
-url<-"https://plot.ly/~weiquanluo/1/embed?width=550&height=550" 
-plotly_iframe <- paste("<center><iframe scrolling='no' seamless='seamless' style='border:none' src='", url, "/800/1200' width='800' height='1200'></iframe></center>", sep = "")
-```
-
-<center>
-
-<iframe scrolling="no" seamless="seamless" style="border:none" src="https://plot.ly/~weiquanluo/1/embed?width=550&amp;height=550/800/1200" width="800" height="1200">
+<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://github.com/WeiquanLuo/LCA-PetFoodSupplyChain/plotly_GHG_TotalCO2.html">
 
 </iframe>
-
-</center>
 
 # 2\. Regression
 
@@ -363,7 +351,7 @@ par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 # 3\. Clustering
 
@@ -386,4 +374,4 @@ good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

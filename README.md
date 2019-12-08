@@ -1,7 +1,7 @@
 EIO-LCA Analysis: Pet Food Supply Chain
 ================
 Weiquan Luo, Mingjun Ma
-2019-12-07
+2019-12-08
 
   - [The Question](#the-question)
       - [Hightlight](#hightlight)
@@ -91,33 +91,6 @@ dim(dat)
 ```
 
 ``` r
-# zero value resut in a greater intercept in regression
-# need to make sure the data are greater than 1 before log transform.
-xy <- dat %>% select(Coal.TJ, Petrol.TJ) %>% as_tibble(); xy %>% head()
-#> # A tibble: 6 x 2
-#>    Coal.TJ Petrol.TJ
-#>      <dbl>     <dbl>
-#> 1 0.000091  0.0350  
-#> 2 0.000017  0.000572
-#> 3 0.000044  0.00749 
-#> 4 0.000024  0.00186 
-#> 5 0         0.0562  
-#> 6 0         0.000718
-xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
-#> [1] 402   2
-xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
-#> [1] 402   2
-xy_1[,1] <- xy_1[,1]*1000
-xy_0[,1] <- xy_0[,1]*1000
-
-plot(log(xy_1+1), type="p",col="blue", 
-     xlab = 'Coal.GJ', ylab= "Petrol.TJ")
-points(log(xy_0+1), type="p",col="red")
-```
-
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
-
-``` r
 # calculate and rename
 calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= pattern, replacement= replacement){
   
@@ -135,9 +108,7 @@ calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= patt
     stats::setNames(stringr::str_replace_all(names(.), pattern= pattern, replacement= replacement )) 
   return(data)
 }
-# Sort environment impact group and input resouce; 
-# unit convertion to result no 0<.<1; 
-# rename by unit
+# piping: Sort environment impact group and input resouce, unit convertion to result no 0<.<1, rename by unit
 CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t) %>% 
   calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.t", replacement= ".g")
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e) %>% 
@@ -183,7 +154,7 @@ psych::pairs.panels(resource,
                     method = "spearman")
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 ``` r
 # Ln X variable
@@ -191,7 +162,7 @@ psych::pairs.panels(log(resource+1),
                     method = "spearman")
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
 
 Let’s take CO2 Equvivalent as the target variable, resource as input
 variables as example for visulization ( [please click
@@ -351,14 +322,14 @@ par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 Check partial-residual plots for each independent variable
 
 ``` r
 car::crPlots(bestglm_list$best_model[[2]])
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 # 3\. Clustering
 
@@ -381,4 +352,4 @@ good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

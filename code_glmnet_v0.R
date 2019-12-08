@@ -104,6 +104,21 @@ waldtest_map <- function(model, null= NULL){
 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list
 
+# test:
+# data <- bestglm_list$data[[9]]; data %>% as_tibble()
+# family = "gaussian"
+# glmnet
+fit_model <- function(data, family = "gaussian"){
+  id <- data %>% select_if(is.factor)
+  Xy <- data %>% select_if(is.numeric)
+  y <- Xy[,ncol(Xy)]
+  X <- Xy[,-ncol(Xy)]
+  best_model <- glmnet::cv.glmnet(x = X %>% as.matrix(), y =y, family = family, alpha = 1)
+  # plot(best_model) 
+  # best_model$lambda.min
+  # coef(best_model, s = "lambda.min") # lambda.min give the minimum mean cross-validated error to the model
+  return(best_model)
+}
 # model selection for each impact variable
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
@@ -113,100 +128,14 @@ bestglm_list <- target_list %>%
   mutate(rowdata = data %>% map_dbl(nrow)) %>% 
   filter(rowdata > 100) %>% 
   select(-rowdata) %>% 
-  mutate(best_model = data %>% map(fit_model)) %>% 
-  mutate(anv = best_model %>% map(anova)) %>% 
-  mutate(statisics = best_model %>% purrr::map(.f = function(m) broom::glance(m))) %>% 
-  tidyr::unnest(statisics) %>% 
-  mutate(wald_pval = best_model %>% 
-           purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
-  mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
-  arrange(desc(adj.r.squared))
-# extract coef from each model
+  mutate(best_model = data %>% map(function(data) fit_model(data = data, family = "gaussian"))) %>% 
+  mutate(lambda.min = best_model %>% purrr::map_dbl(.f = function(m) m$lambda.min))
+
 coef_list <- bestglm_list %>% 
-  mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
+  mutate(coefs = best_model %>% purrr::map(function(best_model) coef(best_model, s = "lambda.min") %>% as.matrix %>% t %>% as.data.frame)) %>% 
   select(target, coefs) %>% 
-  tidyr::unnest(coefs) %>% 
-  select(target, term, estimate) %>% 
-  tidyr::spread(key= term, value = estimate)
-# extract pval for all coef from each model
-signif_list <- bestglm_list %>% 
-  mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
-  select(target, coefs) %>% 
-  tidyr::unnest(coefs) %>% 
-  select(target, term, p.value) %>% 
-  tidyr::spread(key= term, value = p.value)
-# combind coef and pval for visual
-coef_signif_list <- coef_list %>% 
-  select(target) %>% 
-  cbind(apply(abind::abind(coef_list %>% 
-                             select(-target) %>% 
-                             mutate_if(is.numeric, signif, digits = 3) %>% 
-                             mutate_all(as.character),
-                           signif_list %>% 
-                             select(-target) %>% 
-                             mutate_if(is.numeric, gtools::stars.pval),along=3),
-              1:2, bind_coef_star))
-# add statistic to the coef and pval
-coef_signif_list <- bestglm_list %>% 
-  select(target, adj.r.squared, p.value, wald_pval) %>% 
-  mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
-  left_join(coef_signif_list, by="target")
-# get exponent_sum
-coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+  tidyr::unnest(coefs) 
 
-# result
-bestglm_list # result of model selection
-coef_list # result of coef placeholder
-signif_list # result of signif of coefs placeholder
-coef_signif_list # aggregation view of coef and signif
-
-#coef_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE)
-#save(bestglm_list, coef_list, signif_list, coef_signif_list, file = "data/regression.Rdata")
-
-good_coef <- coef_signif_list %>% filter(adj.r.squared >0.75); good_coef
-good_lm <- bestglm_list %>% filter(adj.r.squared >0.75);  good_lm
-par(mfrow=c(2,3))
-plot(good_lm$best_model[[1]], which=1:6)
-plot(good_lm$best_model[[2]], which=1:6)
-plot(good_lm$best_model[[3]], which=1:6)
-plot(good_lm$best_model[[4]], which=1:6)
-dev.off()
-
-par(mfrow=c(2,3))
-i=2
-plot(bestglm_list$best_model[[i]], which=1:6); bestglm_list[i,]
-
-car::crPlots(bestglm_list$best_model[[i]])
-
-# descriptive analysis
-good_lm$target
-# CO2.Fossil.t.CO2e	C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
-# Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
-# NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
-# SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
-
-psych::pairs.panels(resource %>% cbind(dat$SO2.g), 
-                    method = "spearman")
-psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)), 
-                    method = "spearman")
-
-
-par(mfrow=c(1,2))
-i=1
-good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
-plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
-
-i=2
-good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
-plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
-
-i=3
-good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
-plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
-
-i=4
-good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
-plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
-
-dev.off()
-
+# Result
+bestglm_list
+coef_list

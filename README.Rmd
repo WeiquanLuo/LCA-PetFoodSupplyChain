@@ -61,21 +61,6 @@ dim(dat)
 ```
 
 ```{r}
-# zero value resut in a greater intercept in regression
-# need to make sure the data are greater than 1 before log transform.
-xy <- dat %>% select(Coal.TJ, Petrol.TJ) %>% as_tibble(); xy %>% head()
-xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
-xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
-xy_1[,1] <- xy_1[,1]*1000
-xy_0[,1] <- xy_0[,1]*1000
-
-plot(log(xy_1+1), type="p",col="blue", 
-     xlab = 'Coal.GJ', ylab= "Petrol.TJ")
-points(log(xy_0+1), type="p",col="red")
-
-```
-
-```{r}
 # calculate and rename
 calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= pattern, replacement= replacement){
   
@@ -93,9 +78,7 @@ calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= patt
     stats::setNames(stringr::str_replace_all(names(.), pattern= pattern, replacement= replacement )) 
   return(data)
 }
-# Sort environment impact group and input resouce; 
-# unit convertion to result no 0<.<1; 
-# rename by unit
+# piping: Sort environment impact group and input resouce, unit convertion to result no 0<.<1, rename by unit
 CPA <- dat %>% select(CO.t, NH3.t, NOx.t, PM10.t, PM2.5.t, SO2.t, VOC.t) %>% 
   calculate_formula_replace_nm(formula = y~x*10^6, pattern= "\\.t", replacement= ".g")
 GHG <- dat %>% select(Total.t.CO2e, CO2.Fossil.t.CO2e, CO2.Process.t.CO2e, CH4.t.CO2e, HFC.PFCs.t.CO2e) %>% 
@@ -224,7 +207,6 @@ coef_signif_list <- bestglm_list %>%
 # get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
-
 
 ```{r}
 # result

@@ -16,19 +16,6 @@ dat[which(dat$X %in% c(16, 78, 88)),]
 dat$X
 dat %>% tibble()
 
-# zero value resut in a greater intercept in regression
-# need to make sure the data are greater than 1 before log transform.
-xy <- dat %>% select(Petrol.TJ, Coal.TJ) %>% as_tibble();xy
-xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
-xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
-xy_1[,1] <- xy_1[,1]*1000
-xy_0[,1] <- xy_0[,1]*1000
-
-plot(log(xy_1+1), type="p",col="blue", 
-     xlab = 'Coal.GJ', ylab= "Petrol.TJ")
-points(log(xy_0+1), type="p",col="red")
-
-
 # calculate and rename
 calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= pattern, replacement= replacement){
   

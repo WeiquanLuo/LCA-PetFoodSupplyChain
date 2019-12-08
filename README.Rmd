@@ -1,5 +1,10 @@
 ---
-output: github_document
+title: "EIO-LCA Analysis: Pet Food Supply Chain"
+author: "Weiquan Luo, Mingjun Ma"
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+      toc: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -13,40 +18,31 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Interesting question
+# The Question
 
 The goal of this project is to study the environmental impact of a certain amount of production with Economic Input-Output Life Cycle Assessment (EIO-LCA) method, which estimates activities in our economy in the materials and energy resources required for and the environmental impact resulting from. The environmental impacts involove conventional air poluten (CAP), greenhouse gass (GHG), and toix release (TOX). Cradle-to-grave is the full Life Cycle Assessment from resource extraction to use phase and disposal phase. Specificallym, this analysis is base on the Cradle-to-grave EIO-LCA result to further understand how all industrial stages of producing Million Dollars product *in Dog and Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in environmental impact. The study aim to answer the following questions:
 
-* which industry(s) have larger impact among all industries?
-* what are the relationship between some impact relative to the input (ie. Energy, water withdraw)?
-* how the outlier industry(s) behave in linear regression models
+1. which industry(s) have larger impact among all industries?
+2. what are the relationship between some impact relative to the input (ie. Energy, water withdraw)?
+3. how the outlier industry(s) behave in linear regression models
 
+### Hightlight
 
-## Hightlight
+* for dog and cat food Manufacturing, the greatest environmental impacts come frome any raw material production industries such as agricultural farming.
+* most of industries use either NonFossoil Eletrecity or Fossoil Eletrecity
+* for those industries using biowaste as energy source have higher impact in toxic.
 
-1. for dog and cat food Manufacturing, the greatest environmental impacts come frome any raw material production industries such as agricultural farming.
-
-2. we successfully fit linear regression model on the following environmental impact using energy and water withdraw as input:
-
-* Emissions of Nitrogen Oxides to Air,
-* Emissions of Sulfur Dioxide to Air,
-* weighting of greenhouse gas emissions into the air from the production,
-* Emissions of Carbon Dioxide (CO2) into the air from fossil fuel combus.
-
-3. most of industries use either NonFossoil Eletrecity or Fossoil Eletrecity
-4. for those industries using biowaste as energy source have higher impact in toxic.
-
-## Workflow
+# Workflow
 
 <center>
-![LCA:Pet Food Supply Chain](doc/LCA_ Pet Food Supply Chain .png){width=100%}
+![EIO-LCA:Pet Food Supply Chain](img/EIO-LCA_ Pet Food Supply Chain.png){width=100%}
 </center>
 
-# Data description
+# 1. Data description
 The dataset for this project is the first pass life cycle assessment results for cat and dog food manufacturing. It provides the environmental impact information into the pet food supply chain. The LCA data was generated through EIO-LCA website(http://www.eiolca.net/cgi-bin/dft/use.pl).  The model for getting the LCA data is US 2002 producer price benchmark. In order to get the dog and cat food manufacturing LCA data, the user needs to select “Food beverage and tobacco” sector group, dog and cat food manufacturing sector and then the amount of economic activity for this sector(e.g. 1 millon dollars). After setting up the sector and economic parameters, The user could select different economical and environmental impact to get the LCA results.
 The LCA results are ready for downloading as excel files. The raw data was lacking the columns name for different impact feature and index for identifying the different sectors and sector group. The web scraping is necessary for the columns name and NAICS sector code. 
  
-```{r include=FALSE, }
+```{r include=FALSE}
 library(dplyr)
 library(purrr)
 library(kableExtra)
@@ -54,20 +50,20 @@ library(plotly)
 library(RColorBrewer)
 ```
 
-# Explore the data
+# 2. Explore the data
 
 After webscaping, combinding the raw data, and manually making minor modification, we result a datafarme stored as 'dat_311111_1M_v2.csv.
  
 ```{r}
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
-colnames(dat)
+dim(dat)
 ```
 
 ```{r}
 # zero value resut in a greater intercept in regression
 # need to make sure the data are greater than 1 before log transform.
-xy <- dat %>% select(Petrol.TJ, Coal.TJ) %>% as_tibble();xy
+xy <- dat %>% select(Coal.TJ, Petrol.TJ) %>% as_tibble(); xy %>% head()
 xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
 xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
 xy_1[,1] <- xy_1[,1]*1000
@@ -78,7 +74,6 @@ plot(log(xy_1+1), type="p",col="blue",
 points(log(xy_0+1), type="p",col="red")
 
 ```
-
 
 ```{r}
 # calculate and rename
@@ -114,17 +109,21 @@ resource <- dat %>% select(Coal.TJ, NatGase.TJ, Petrol.TJ,Bio.Waste.TJ, NonFossE
 ID <- dat %>% select(Sector, Description, name_sub, Sector_sub) %>% mutate_all(as.factor)
 dat <- cbind(ID, CPA, GHG, TOX, resource)
 
+# summary statistic for X variable
 ys <- cbind(CPA, GHG, TOX)
 psych::describe(ys) %>% knitr::kable(format = "markdown") 
 ```
 
 ```{r}
-psych::pairs.panels(resource %>% cbind(dat$SO2.g), 
+# raw X variable
+psych::pairs.panels(resource, 
                     method = "spearman")
-psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)), 
+# Ln X variable
+psych::pairs.panels(log(resource+1), 
                     method = "spearman")
 ```
 
+Let's take CO2 Equvivalent as the target variable, resource as input variables as example for visulization:
 ```{r}
 library("knitr")
 library("devtools")
@@ -134,11 +133,9 @@ plotly_iframe <- paste("<center><iframe scrolling='no' seamless='seamless' style
 
 `r I(plotly_iframe)`
 
-# Clustering for the data
+# 2. Regression
 
-# Regression
-
-## user-define function
+## 2.1 user-define function
 ```{r}
 # test: target_nm = "CO.g",  X = resource
 makedata_map <- function(target_nm, dat, X){
@@ -153,7 +150,6 @@ makedata_map <- function(target_nm, dat, X){
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
-# bestglm
 fit_model <- function(data){
   best_model <- bestglm::bestglm(Xy=data %>% 
                                    select_if(is.numeric), 
@@ -172,7 +168,6 @@ bind_coef_star <- function(x) {
     ""
   }
 }
-
 # test: model <- bestglm_list$best_model[[1]], null <- 1
 waldtest_map <- function(model, null= NULL){
   test.terms <- paste0("~", names(coef(model))[-1] %>% paste(collapse = "+")) %>% 
@@ -183,12 +178,13 @@ waldtest_map <- function(model, null= NULL){
 }
 ```
 
-## Linear Regression Modeling with log10 Transformation on Input and Output
+## 2.2 Ln-Ln Linear Regression
+
 ```{r}
 # create a dataframe with a column with impact variable names 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list %>% flatten() %>% unlist()
 
-# model selection for each impact variable
+# piping: variale selection, anova, extract statistic, wald test
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
            map(function(target_nm) makedata_map(target_nm,
@@ -205,21 +201,21 @@ bestglm_list <- target_list %>%
            purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
   mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
   arrange(desc(r.squared))
-
+# extract coef from each model
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, estimate) %>% 
   tidyr::spread(key= term, value = estimate)
-
+# extract pval for all coef from each model
 signif_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
-
+# combind coef and pval for visual
 datArray <- abind::abind(coef_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, signif, digits = 3) %>% 
@@ -227,34 +223,41 @@ datArray <- abind::abind(coef_list %>%
                          signif_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
+# add statistic to the coef and pval
 coef_signif_list <- bestglm_list %>% 
   select(target, adj.r.squared, p.value, wald_pval) %>% 
   mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
-
+# get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+```
 
 
+```{r}
 # result
 coef_signif_list %>% knitr::kable(format = "markdown") 
 ```
 
-# Communciate and visualize the results
+## 2.3 The diagnosis of linear model
 
-## The linear model with R^2 >0.75
+The following linear model with R^2 >0.75
 ```{r}
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
 good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% unlist
 ```
 
-## The diagnosis of linear model
+For instance, check diagnosis for model of CO2 Equvivalent:
 ```{r}
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-# Result
-## Impact between Sector 
+# 3. Clustering
+
+
+
+# 4. Result for Total CO2 equivalent
+## 4.1 Impact between Sector 
 
 ```{r}
 # descriptive analysis
@@ -268,3 +271,4 @@ i=2
 good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
+

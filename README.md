@@ -1,7 +1,26 @@
+EIO-LCA Analysis: Pet Food Supply Chain
+================
+Weiquan Luo, Mingjun Ma
+2019-12-07
+
+  - [The Question](#the-question)
+      - [Hightlight](#hightlight)
+  - [Workflow](#workflow)
+  - [1. Data description](#data-description)
+  - [2. Explore the data](#explore-the-data)
+  - [2. Regression](#regression)
+      - [2.1 user-define function](#user-define-function)
+      - [2.2 Ln-Ln Linear Regression](#ln-ln-linear-regression)
+      - [2.3 The diagnosis of linear
+        model](#the-diagnosis-of-linear-model)
+  - [3. Clustering](#clustering)
+  - [4. Result for Total CO2
+    equivalent](#result-for-total-co2-equivalent)
+      - [4.1 Impact between Sector](#impact-between-sector)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Interesting question
+# The Question
 
 The goal of this project is to study the environmental impact of a
 certain amount of production with Economic Input-Output Life Cycle
@@ -16,46 +35,31 @@ all industrial stages of producing Million Dollars product *in Dog and
 Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in
 environmental impact. The study aim to answer the following questions:
 
-  - which industry(s) have larger impact among all industries?
-  - what are the relationship between some impact relative to the input
+1.  which industry(s) have larger impact among all industries?
+2.  what are the relationship between some impact relative to the input
     (ie. Energy, water withdraw)?
-  - how the outlier industry(s) behave in linear regression models
+3.  how the outlier industry(s) behave in linear regression models
 
-## Hightlight
+### Hightlight
 
-1.  for dog and cat food Manufacturing, the greatest environmental
+  - for dog and cat food Manufacturing, the greatest environmental
     impacts come frome any raw material production industries such as
     agricultural farming.
-
-2.  we successfully fit linear regression model on the following
-    environmental impact using energy and water withdraw as input:
-
-<!-- end list -->
-
-  - Emissions of Nitrogen Oxides to Air,
-  - Emissions of Sulfur Dioxide to Air,
-  - weighting of greenhouse gas emissions into the air from the
-    production,
-  - Emissions of Carbon Dioxide (CO2) into the air from fossil fuel
-    combus.
-
-<!-- end list -->
-
-3.  most of industries use either NonFossoil Eletrecity or Fossoil
+  - most of industries use either NonFossoil Eletrecity or Fossoil
     Eletrecity
-4.  for those industries using biowaste as energy source have higher
+  - for those industries using biowaste as energy source have higher
     impact in toxic.
 
-## Workflow
+# Workflow
 
 <center>
 
-![LCA:Pet Food Supply
-Chain](doc/LCA_%20Pet%20Food%20Supply%20Chain%20.png)
+![EIO-LCA:Pet Food Supply
+Chain](img/EIO-LCA_%20Pet%20Food%20Supply%20Chain.png)
 
 </center>
 
-# Data description
+# 1\. Data description
 
 The dataset for this project is the first pass life cycle assessment
 results for cat and dog food manufacturing. It provides the
@@ -74,7 +78,7 @@ impact feature and index for identifying the different sectors and
 sector group. The web scraping is necessary for the columns name and
 NAICS sector code.
 
-# Explore the data
+# 2\. Explore the data
 
 After webscaping, combinding the raw data, and manually making minor
 modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
@@ -82,48 +86,23 @@ modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
 ``` r
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
-colnames(dat)
-#>  [1] "X"                             "Sector"                       
-#>  [3] "Description"                   "name_sub"                     
-#>  [5] "Sector_sub"                    "Total.Economic.mill.dollar"   
-#>  [7] "Total.value.Added.mill.dollar" "Employee.Com.mill.dollar"     
-#>  [9] "Net.Tax.mill.dollar"           "Profits.mill.dollar"          
-#> [11] "Direct.Economic.mill.dollar"   "Direct.Economic"              
-#> [13] "CO.t"                          "NH3.t"                        
-#> [15] "NOx.t"                         "PM10.t"                       
-#> [17] "PM2.5.t"                       "SO2.t"                        
-#> [19] "VOC.t"                         "Total.Energy.TJ"              
-#> [21] "Coal.TJ"                       "NatGase.TJ"                   
-#> [23] "Petrol.TJ"                     "Bio.Waste.TJ"                 
-#> [25] "NonFossElec.TJ"                "Total.t.CO2e"                 
-#> [27] "CO2.Fossil.t.CO2e"             "CO2.Process.t.CO2e"           
-#> [29] "CH4.t.CO2e"                    "N2O.t.CO2e"                   
-#> [31] "HFC.PFCs.t.CO2e"               "Fugitive.kg"                  
-#> [33] "Stack.kg"                      "Total.Air.kg"                 
-#> [35] "Surface.water.kg"              "U_ground.Water.kg"            
-#> [37] "Land.kg"                       "Offiste.kg"                   
-#> [39] "POTW.Metal.kg"                 "POTW.Nonmetal.kg"             
-#> [41] "Water.Withdrawals.Kgal"
+dim(dat)
+#> [1] 402  41
 ```
 
 ``` r
 # zero value resut in a greater intercept in regression
 # need to make sure the data are greater than 1 before log transform.
-xy <- dat %>% select(Petrol.TJ, Coal.TJ) %>% as_tibble();xy
-#> # A tibble: 402 x 2
-#>    Petrol.TJ  Coal.TJ
-#>        <dbl>    <dbl>
-#>  1  0.0350   0.000091
-#>  2  0.000572 0.000017
-#>  3  0.00749  0.000044
-#>  4  0.00186  0.000024
-#>  5  0.0562   0       
-#>  6  0.000718 0       
-#>  7  0.00112  0       
-#>  8  0.000176 0       
-#>  9  0.000077 0.000002
-#> 10  0.000001 0       
-#> # … with 392 more rows
+xy <- dat %>% select(Coal.TJ, Petrol.TJ) %>% as_tibble(); xy %>% head()
+#> # A tibble: 6 x 2
+#>    Coal.TJ Petrol.TJ
+#>      <dbl>     <dbl>
+#> 1 0.000091  0.0350  
+#> 2 0.000017  0.000572
+#> 3 0.000044  0.00749 
+#> 4 0.000024  0.00186 
+#> 5 0         0.0562  
+#> 6 0         0.000718
 xy_1 <- xy[!is.infinite(rowSums(log(xy))),]; xy %>% dim
 #> [1] 402   2
 xy_0 <- xy[is.infinite(rowSums(log(xy))),]; xy %>% dim
@@ -172,6 +151,7 @@ resource <- dat %>% select(Coal.TJ, NatGase.TJ, Petrol.TJ,Bio.Waste.TJ, NonFossE
 ID <- dat %>% select(Sector, Description, name_sub, Sector_sub) %>% mutate_all(as.factor)
 dat <- cbind(ID, CPA, GHG, TOX, resource)
 
+# summary statistic for X variable
 ys <- cbind(CPA, GHG, TOX)
 psych::describe(ys) %>% knitr::kable(format = "markdown") 
 ```
@@ -200,36 +180,43 @@ psych::describe(ys) %>% knitr::kable(format = "markdown")
 | POTW.Metal.mg      |   20 | 402 |     706.3532 |     3661.431 |     0.0 | 3.324224e+01 |     0.0000 |   0 |     40218 |     40218 |  7.481724 |  61.88361 |     182.6156 |
 
 ``` r
-psych::pairs.panels(resource %>% cbind(dat$SO2.g), 
+# raw X variable
+psych::pairs.panels(resource, 
                     method = "spearman")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
 ``` r
-psych::pairs.panels(log(resource+1) %>% cbind(log(dat$SO2.g)), 
+# Ln X variable
+psych::pairs.panels(log(resource+1), 
                     method = "spearman")
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
+
+Let’s take CO2 Equvivalent as the target variable, resource as input
+variables as example for visulization:
 
 ``` r
 library("knitr")
 library("devtools")
 #> Loading required package: usethis
 url<-"https://plot.ly/~weiquanluo/1/embed?width=550&height=550" 
-plotly_iframe <- paste("<iframe scrolling='no' seamless='seamless' style='border:none' src='", url, "/800/1200' width='800' height='1200'></iframe>", sep = "")
+plotly_iframe <- paste("<center><iframe scrolling='no' seamless='seamless' style='border:none' src='", url, "/800/1200' width='800' height='1200'></iframe></center>", sep = "")
 ```
+
+<center>
 
 <iframe scrolling="no" seamless="seamless" style="border:none" src="https://plot.ly/~weiquanluo/1/embed?width=550&amp;height=550/800/1200" width="800" height="1200">
 
 </iframe>
 
-# Clustering for the data
+</center>
 
-# Regression
+# 2\. Regression
 
-## user-define function
+## 2.1 user-define function
 
 ``` r
 # test: target_nm = "CO.g",  X = resource
@@ -245,7 +232,6 @@ makedata_map <- function(target_nm, dat, X){
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
 }
-# bestglm
 fit_model <- function(data){
   best_model <- bestglm::bestglm(Xy=data %>% 
                                    select_if(is.numeric), 
@@ -264,7 +250,6 @@ bind_coef_star <- function(x) {
     ""
   }
 }
-
 # test: model <- bestglm_list$best_model[[1]], null <- 1
 waldtest_map <- function(model, null= NULL){
   test.terms <- paste0("~", names(coef(model))[-1] %>% paste(collapse = "+")) %>% 
@@ -275,7 +260,7 @@ waldtest_map <- function(model, null= NULL){
 }
 ```
 
-## Linear Regression Modeling with log10 Transformation on Input and Output
+## 2.2 Ln-Ln Linear Regression
 
 ``` r
 # create a dataframe with a column with impact variable names 
@@ -288,7 +273,7 @@ target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); ta
 #> [16] "Surface.water.mg"   "U_ground.Water.mg"  "Land.mg"           
 #> [19] "Offiste.mg"         "POTW.Metal.mg"
 
-# model selection for each impact variable
+# piping: variale selection, anova, extract statistic, wald test
 bestglm_list <- target_list %>% 
   mutate(data = target %>% 
            map(function(target_nm) makedata_map(target_nm,
@@ -305,21 +290,21 @@ bestglm_list <- target_list %>%
            purrr::map_dbl(function(model) waldtest_map(model= model, null= 1))) %>% 
   mutate(nrows_data = data %>% purrr::map_dbl(nrow)) %>% 
   arrange(desc(r.squared))
-
+# extract coef from each model
 coef_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, estimate) %>% 
   tidyr::spread(key= term, value = estimate)
-
+# extract pval for all coef from each model
 signif_list <- bestglm_list %>% 
   mutate(coefs = best_model %>% purrr::map(.f=broom::tidy)) %>% 
   select(target, coefs) %>% 
   tidyr::unnest(coefs) %>% 
   select(target, term, p.value) %>% 
   tidyr::spread(key= term, value = p.value)
-
+# combind coef and pval for visual
 datArray <- abind::abind(coef_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, signif, digits = 3) %>% 
@@ -327,14 +312,16 @@ datArray <- abind::abind(coef_list %>%
                          signif_list %>% 
                            select(-target) %>% 
                            mutate_if(is.numeric, gtools::stars.pval),along=3)
+# add statistic to the coef and pval
 coef_signif_list <- bestglm_list %>% 
   select(target, adj.r.squared, p.value, wald_pval) %>% 
   mutate_at(c("adj.r.squared", "p.value", "wald_pval"), signif, digits = 3) %>% 
   cbind(apply(datArray,1:2, bind_coef_star) %>% as_tibble())
-
+# get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
+```
 
-
+``` r
 # result
 coef_signif_list %>% knitr::kable(format = "markdown") 
 ```
@@ -358,9 +345,9 @@ coef_signif_list %>% knitr::kable(format = "markdown")
 | Land.mg           |         0.476 |       0 |          0 | 4.12(\*\*\*)    | 0.0373        | \-0.0822(\*\*) | 0.32(\*\*\*)  | 0.442(\*\*\*)   | 0.508(\*\*\*) |                        |         1.230 |
 | POTW.Metal.mg     |         0.466 |       0 |          0 | \-0.119         | 0.249(\*\*\*) | \-0.137(\*\*)  |               | 0.471(\*\*\*)   | 0.358(\*\*\*) |                        |         0.941 |
 
-# Communciate and visualize the results
+## 2.3 The diagnosis of linear model
 
-## The linear model with R^2 \>0.75
+The following linear model with R^2 \>0.75
 
 ``` r
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
@@ -369,18 +356,20 @@ good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% un
 #> [4] "SO2.g"
 ```
 
-## The diagnosis of linear model
+For instance, check diagnosis for model of CO2 Equvivalent:
 
 ``` r
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
-# Result
+# 3\. Clustering
 
-## Impact between Sector
+# 4\. Result for Total CO2 equivalent
+
+## 4.1 Impact between Sector
 
 ``` r
 # descriptive analysis
@@ -397,4 +386,4 @@ good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />

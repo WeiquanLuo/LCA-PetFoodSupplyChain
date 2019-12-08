@@ -135,8 +135,6 @@ calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= patt
     stats::setNames(stringr::str_replace_all(names(.), pattern= pattern, replacement= replacement )) 
   return(data)
 }
-
-
 # Sort environment impact group and input resouce; 
 # unit convertion to result no 0<.<1; 
 # rename by unit
@@ -196,10 +194,8 @@ psych::pairs.panels(log(resource+1),
 <img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
 
 Let’s take CO2 Equvivalent as the target variable, resource as input
-variables as example for visulization:
-
-[please click
-here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)
+variables as example for visulization ( [please click
+here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html) )
 
 # 2\. Regression
 

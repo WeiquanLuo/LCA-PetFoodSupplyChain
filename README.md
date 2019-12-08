@@ -198,7 +198,7 @@ psych::pairs.panels(log(resource+1),
 Let’s take CO2 Equvivalent as the target variable, resource as input
 variables as example for visulization:
 
-<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://github.com/WeiquanLuo/LCA-PetFoodSupplyChain/plotly_GHG_TotalCO2.html">
+<iframe width="900" height="800" frameborder="0" scrolling="no" src="https://github.com/WeiquanLuo/LCA-PetFoodSupplyChain/img/plotly_GHG_TotalCO2.html">
 
 </iframe>
 

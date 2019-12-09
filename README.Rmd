@@ -42,25 +42,26 @@ The LCA results are ready for downloading as excel files. The raw data was lacki
 </center>
 
 
-```{r include=FALSE}
+```{r pkg, include=FALSE}
 library(dplyr)
 library(purrr)
 library(kableExtra)
 library(plotly)
 library(RColorBrewer)
+library(ggplot2)
 ```
 
 # Explore the data
 
 After webscaping, combinding the raw data, and manually making minor modification, we result a datafarme stored as 'dat_311111_1M_v2.csv.
  
-```{r}
+```{r read_csv}
 # data input
 dat <- read.csv("data/dat_311111_1M_v2.csv")
 dim(dat)
 ```
 
-```{r}
+```{r clearData}
 # calculate and rename
 calculate_formula_replace_nm <- function(data, formula = y~1000*x, pattern= pattern, replacement= replacement){
   
@@ -95,7 +96,7 @@ ys <- cbind(CPA, GHG, TOX)
 psych::describe(ys) %>% knitr::kable(format = "markdown") 
 ```
 
-```{r}
+```{r corplot}
 # raw X variable
 psych::pairs.panels(resource, 
                     method = "spearman")
@@ -104,12 +105,12 @@ psych::pairs.panels(log(resource+1),
                     method = "spearman")
 ```
 
-Let's take CO2 Equvivalent as the target variable, resource as input variables as example for visulization ( [please click here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html) )
+Let's take CO2 Equvivalent as the target variable, resource as input variables as example for visulization (click [Here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
 
 # Regression
 
 ## user-define function
-```{r}
+```{r udfunc}
 # test: target_nm = "CO.g",  X = resource
 makedata_map <- function(target_nm, dat, X){
   # loglog transform
@@ -118,7 +119,7 @@ makedata_map <- function(target_nm, dat, X){
   LnX <- log(X+1) %>% stats::setNames(paste0("Ln", names(.)))
   # combine, filter log(y)=0; add ID:Sector
   Xy <- cbind(LnX, Lny)
-  Xy <- cbind(dat %>% select(Sector), Xy) 
+  Xy <- cbind(dat %>% select(Sector, Description, name_sub, Sector_sub), Xy) 
   Xy <- Xy[!is.infinite(rowSums(Lny)),]
   colnames(Xy) <- colnames(Xy) %>% stringr::str_replace_all("\\.","") 
   return(Xy)
@@ -153,7 +154,7 @@ waldtest_map <- function(model, null= NULL){
 
 ## Ln-Ln Linear Regression
 
-```{r}
+```{r glm_fit}
 # create a dataframe with a column with impact variable names 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list %>% flatten() %>% unlist()
 
@@ -208,44 +209,36 @@ coef_signif_list <- bestglm_list %>%
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
 
-```{r}
+```{r coef_signif_list}
 # result
 coef_signif_list %>% 
   arrange(desc(adj.r.squared)) %>% 
   knitr::kable(format = "markdown") 
 ```
 
-## The diagnosis of linear model
-
 The following linear model with R^2 >0.75
-```{r}
+
+```{r goodmodel}
 good_lm <- bestglm_list %>% filter(adj.r.squared >0.75)
 good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% unlist
 ```
 
-For instance, check diagnosis for model of CO2 Equvivalent:
-```{r}
+## diagnosis for GHG CO2 Equvivalent model:
+
+```{r diagsis}
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
 ```
-Check partial-residual plots for each independent variable
-```{r}
+
+## partial-residual plots
+
+```{r prplot}
 car::crPlots(bestglm_list$best_model[[2]])
 ```
 
-# Clustering
-
-
-
-# Result for Total CO2 equivalent
-## Impact between Sector 
+## Randome Effect: Impact among Sectors
 
 ```{r}
-# descriptive analysis
-good_lm$target
-# NOx.t: Emissions of Nitrogen Oxides to Air from each sector. t = meric tons
-# SO2.t: Emissions of Sulfur Dioxide to Air from each sector. t = meric tons 
-# Total.t.CO2e: Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions. 
 # CO2.Fossil.t.CO2e	C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
 par(mfrow=c(1,2))
 i=2
@@ -253,6 +246,115 @@ good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
 plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
+```{r}
+# random effect
+data_anv <- good_lm$data[[2]] %>% select(-Description,-name_sub, -Sector_sub)
+model.rand_block <- nlme::lme(data = data_anv,
+                     LnTotalgCO2e ~ LnBioWasteMJ + LnCoalMJ + LnNatGaseMJ + LnNonFossElecMJ + LnPetrolMJ,
+                     random = ~1|Sector)
+# anova(model.rand_block)
+# fixed effects in the model
+model.fixed = nlme::gls(data = data_anv,
+                  LnTotalgCO2e ~ LnBioWasteMJ + LnCoalMJ + LnNatGaseMJ + LnNonFossElecMJ + LnPetrolMJ,
+                  method="REML")
+# anova(model.fixed)
+# Test the random effects in the model
+anova(model.rand_block, model.fixed)
+```
 
-# Class Exercise
+The extremely small p-value in testing random effect suggest that there are significant difference in green house gases CO2 equivalence among sectors.
 
+# Clustering for CO2 Equvivalent
+
+For instance, we are interested in what is the outlier of the industries to produce CO2 Equvivalent. A DBSCANS algorithm is to cluster the industries. The clearn data for CO2 Equvivalent is obtained from the `bestglm_list` object above.
+
+```{r dat_ghg}
+# input data to clustering using python
+dat_ghg_total_co2e <-bestglm_list %>% filter(target =="Total.g.CO2e") %>% select(data)
+dat_ghg_total_co2e <- dat_ghg_total_co2e[[1]][[1]]
+dat_ghg <- dat_ghg_total_co2e[,-c(1:4)]
+dat_ghg %>% head %>% knitr::kable(format = "markdown") 
+```
+
+We feed the data fitting linear regression model for CO2 Equvivalent to the cluster algorithm in python
+
+```{r use_python}
+# use python3 engine
+library(reticulate)
+use_python("/usr/local/bin/python3")
+```
+
+```{python package}
+# data type
+import pandas as pd
+import numpy as np
+# visualization
+import seaborn as sns
+import matplotlib.pyplot as plt
+import collections
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
+# fit model
+from sklearn.cluster import DBSCAN
+```
+
+```{python getX}
+# input
+dat_ghg = r.dat_ghg
+dat_ghg1 = dat_ghg.iloc[:,1:]
+```
+
+## dendrogram
+```{python dendrogram}
+# dendrogram
+Z = linkage(dat_ghg1, method='ward')
+plt.figure(figsize=(15,15))
+dendrogram(Z) 
+plt.yscale('symlog')
+plt.show()
+```
+
+## Elbow plot
+
+```{python elbow}
+# Elbow plot: number of instance in cluster by hyperparameter eps
+count = []
+for i in np.arange(0.01, 5, 0.01): 
+    clustering = DBSCAN(eps= i).fit(dat_ghg1)
+    a = clustering.labels_
+    b = collections.Counter(a).get(-1)
+    count.append(b)
+plt.plot(pd.Series(np.arange(0.01, 5, 0.01)),count)
+print(count)
+```
+
+## DBSCAN at eps = 4
+
+```{python fit model}
+Cluster_ghg = DBSCAN(eps=4).fit(dat_ghg1)
+cluster_labels = Cluster_ghg.labels_
+```
+
+## check result
+
+```{r cluster_point_plot}
+dat_ghg_total_co2e$Sector <- dat_ghg_total_co2e$Description
+dat_ghg_total_co2e$labels <- py$cluster_labels %>% as.factor()
+p <- ggplot(data = dat_ghg_total_co2e, 
+            aes(text = paste("sub_Sector:", name_sub))) + 
+  geom_point(aes(x = Sector, 
+                 y = LnTotalgCO2e, 
+                 color = labels)) +
+  coord_flip() + 
+  theme(text = element_text(size=8)); p
+```
+
+```{r cluster_point_plot_ly, include=FALSE}
+htmlwidgets::saveWidget(ggplotly(p),
+                        file ="ghg_total_co2e_cluster.html")
+```
+
+(click [HERE](https://weiquanluo.github.io/img/ghg_total_co2e_cluster.html) for interactive plot)
+
+# Exercise
+
+Please, click [HERE]() to Exercise.

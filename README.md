@@ -1,46 +1,45 @@
 EIO-LCA Analysis: Pet Food Supply Chain
 ================
 Weiquan Luo, Mingjun Ma
-2019-12-08
+2019-12-09
 
-  - [The Question](#the-question)
-      - [Hightlight](#hightlight)
+  - [Background information](#background-information)
+  - [Interesting question](#interesting-question)
+  - [Hightlight of result](#hightlight-of-result)
+  - [Data description](#data-description)
   - [Workflow](#workflow)
-  - [1. Data description](#data-description)
-  - [2. Explore the data](#explore-the-data)
-  - [2. Regression](#regression)
-      - [2.1 user-define function](#user-define-function)
-      - [2.2 Ln-Ln Linear Regression](#ln-ln-linear-regression)
-      - [2.3 The diagnosis of linear
-        model](#the-diagnosis-of-linear-model)
-  - [3. Clustering](#clustering)
-  - [4. Result for Total CO2
-    equivalent](#result-for-total-co2-equivalent)
-      - [4.1 Impact between Sector](#impact-between-sector)
+  - [Explore the data](#explore-the-data)
+  - [Regression](#regression)
+      - [user-define function](#user-define-function)
+      - [Ln-Ln Linear Regression](#ln-ln-linear-regression)
+      - [The diagnosis of linear model](#the-diagnosis-of-linear-model)
+  - [Clustering](#clustering)
+  - [Result for Total CO2 equivalent](#result-for-total-co2-equivalent)
+      - [Impact between Sector](#impact-between-sector)
+  - [Class Exercise](#class-exercise)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# The Question
+# Background information
 
-The goal of this project is to study the environmental impact of a
-certain amount of production with Economic Input-Output Life Cycle
-Assessment (EIO-LCA) method, which estimates activities in our economy
-in the materials and energy resources required for and the environmental
-impact resulting from. The environmental impacts involove conventional
-air poluten (CAP), greenhouse gass (GHG), and toix release (TOX).
-Cradle-to-grave is the full Life Cycle Assessment from resource
-extraction to use phase and disposal phase. Specificallym, this analysis
-is base on the Cradle-to-grave EIO-LCA result to further understand how
-all industrial stages of producing Million Dollars product *in Dog and
-Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in
-environmental impact. The study aim to answer the following questions:
+According to the APPA (American Pet Product Association) 2019-2020 pet
+owner survey, around 84.9 million U.S. households own pet, which is
+about 67% of the U.S. homes (APPA, 2019). In 2018, the U.S. customer
+spent 72.56 billion dollars on their pets, of which 30.32 billion
+dollars is for pet food. From a 2017 U.S. pet owners survey, 2% of dog
+and cat owners select their pet food based on product claim of
+sustainable or eco-friendly pet food formula. Although the percentage is
+low, the interest in the sustainability of the pet food has grown a lot
+recently.
 
-1.  which industry(s) have larger impact among all industries?
-2.  what are the relationship between some impact relative to the input
-    (ie. Energy, water withdraw)?
-3.  how the outlier industry(s) behave in linear regression models
+# Interesting question
 
-### Hightlight
+What is the scientitifc goal? What would you do if you had all the data?
+What do you want to predict or estimate? Why is this relevant to ABE
+researchers or the field? Provide some background on the rationale and
+relevance.
+
+# Hightlight of result
 
   - for dog and cat food Manufacturing, the greatest environmental
     impacts come frome any raw material production industries such as
@@ -50,16 +49,7 @@ environmental impact. The study aim to answer the following questions:
   - for those industries using biowaste as energy source have higher
     impact in toxic.
 
-# Workflow
-
-<center>
-
-![EIO-LCA:Pet Food Supply
-Chain](img/EIO-LCA_%20Pet%20Food%20Supply%20Chain.png)
-
-</center>
-
-# 1\. Data description
+# Data description
 
 The dataset for this project is the first pass life cycle assessment
 results for cat and dog food manufacturing. It provides the
@@ -78,7 +68,16 @@ impact feature and index for identifying the different sectors and
 sector group. The web scraping is necessary for the columns name and
 NAICS sector code.
 
-# 2\. Explore the data
+# Workflow
+
+<center>
+
+![EIO-LCA:Pet Food Supply
+Chain](img/EIO-LCA_%20Pet%20Food%20Supply%20Chain.png)
+
+</center>
+
+# Explore the data
 
 After webscaping, combinding the raw data, and manually making minor
 modification, we result a datafarme stored as ’dat\_311111\_1M\_v2.csv.
@@ -168,9 +167,9 @@ Let’s take CO2 Equvivalent as the target variable, resource as input
 variables as example for visulization ( [please click
 here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html) )
 
-# 2\. Regression
+# Regression
 
-## 2.1 user-define function
+## user-define function
 
 ``` r
 # test: target_nm = "CO.g",  X = resource
@@ -214,7 +213,7 @@ waldtest_map <- function(model, null= NULL){
 }
 ```
 
-## 2.2 Ln-Ln Linear Regression
+## Ln-Ln Linear Regression
 
 ``` r
 # create a dataframe with a column with impact variable names 
@@ -304,7 +303,7 @@ coef_signif_list %>%
 | Land.mg           |         0.476 |       0 |          0 | \-0.368         |               | 0.229(\*)      | \-0.403       | 0.711(\*\*\*)   | 0.321(\*)     | 0.245(\*)              |         1.230 |
 | POTW.Metal.mg     |         0.466 |       0 |          0 | 0.28            | 0.269(\*\*\*) |                |               | 0.519(\*\*\*)   |               |                        |         0.941 |
 
-## 2.3 The diagnosis of linear model
+## The diagnosis of linear model
 
 The following linear model with R^2 \>0.75
 
@@ -331,11 +330,11 @@ car::crPlots(bestglm_list$best_model[[2]])
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
-# 3\. Clustering
+# Clustering
 
-# 4\. Result for Total CO2 equivalent
+# Result for Total CO2 equivalent
 
-## 4.1 Impact between Sector
+## Impact between Sector
 
 ``` r
 # descriptive analysis
@@ -353,3 +352,5 @@ plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
+# Class Exercise

@@ -403,14 +403,15 @@ dat_ghg1 = dat_ghg.iloc[:,1:]
 ## Dendrogram
 ```{python dendrogram}
 # dendrogram
-Z = linkage(dat_ghg1, method='ward')
+Z = linkage(dat_ghg1, method='single')
 plt.figure(figsize=(15,15))
 dendrogram(Z) 
 plt.yscale('symlog')
 plt.show()
 ```
+## DBSCAN 
 
-## Elbow plot
+## DBSCAN 
 
 ```{python elbow}
 # Elbow plot: number of instance in cluster by hyperparameter eps
@@ -423,7 +424,7 @@ for i in np.arange(0.01, 5, 0.01):
 plt.plot(pd.Series(np.arange(0.01, 5, 0.01)),count)
 ```
 
-## DBSCAN at eps = 4
+We decide to use eps = 4 for DBSCANS.
 
 ```{python fit model}
 Cluster_ghg = DBSCAN(eps=4).fit(dat_ghg1)

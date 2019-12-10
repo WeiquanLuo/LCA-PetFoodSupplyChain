@@ -412,10 +412,10 @@ dendrogram(Z)
 plt.yscale('symlog')
 plt.show()
 ```
-
 ## DBSCAN 
 
 To better seperate those outliers from the main cluster, we decide to use DBSCAN to cluster the data.
+
 
 ```{python elbow}
 # Elbow plot: number of instance in cluster by hyperparameter eps

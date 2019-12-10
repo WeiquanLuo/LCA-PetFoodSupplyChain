@@ -20,7 +20,6 @@ Weiquan Luo, Mingjun Ma
         sectors](#random-effect-impact-among-sectors)
   - [Clustering for CO2 Equvivalent](#clustering-for-co2-equvivalent)
       - [Dendrogram](#dendrogram)
-      - [DBSCAN](#dbscan)
       - [Visualize clusters](#visualize-clusters)
   - [Discussion](#discussion)
   - [Final Note](#final-note)
@@ -518,9 +517,8 @@ plt.yscale('symlog')
 plt.show()
 ```
 
-<img src="man/figures/README-dendrogram-1.png" width="100%" />
-
-## DBSCAN
+<img src="man/figures/README-dendrogram-1.png" width="100%" /> \#\#
+DBSCAN
 
 To better seperate those outliers from the main cluster, we decide to
 use DBSCAN to cluster the data.

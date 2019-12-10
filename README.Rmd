@@ -401,16 +401,21 @@ dat_ghg1 = dat_ghg.iloc[:,1:]
 ```
 
 ## Dendrogram
+
+To understand how the magnitude are different among industries, we first perform and single linked hierarchical clustering to see any possible pattern. From the following dendrogram, we see there obviously two cluster. We assume that the smaller cluster is the group of outliers.
+
 ```{python dendrogram}
 # dendrogram
-Z = linkage(dat_ghg1, method='ward')
+Z = linkage(dat_ghg1, method='single')
 plt.figure(figsize=(15,15))
 dendrogram(Z) 
 plt.yscale('symlog')
 plt.show()
 ```
 
-## Elbow plot
+## DBSCAN 
+
+To better seperate those outliers from the main cluster, we decide to use DBSCAN to cluster the data.
 
 ```{python elbow}
 # Elbow plot: number of instance in cluster by hyperparameter eps
@@ -423,7 +428,7 @@ for i in np.arange(0.01, 5, 0.01):
 plt.plot(pd.Series(np.arange(0.01, 5, 0.01)),count)
 ```
 
-## DBSCAN at eps = 4
+We decide to use eps = 4 for DBSCANS.
 
 ```{python fit model}
 Cluster_ghg = DBSCAN(eps=4).fit(dat_ghg1)

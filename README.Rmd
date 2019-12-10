@@ -412,7 +412,8 @@ dendrogram(Z)
 plt.yscale('symlog')
 plt.show()
 ```
-## DBSCAN 
+
+## DBSCAN
 
 To better seperate those outliers from the main cluster, we decide to use DBSCAN to cluster the data.
 

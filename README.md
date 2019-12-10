@@ -9,19 +9,22 @@ Weiquan Luo, Mingjun Ma
   - [Data description](#data-description)
   - [Workflow](#workflow)
   - [Explore the data](#explore-the-data)
+      - [Correlation](#correlation)
   - [Regression](#regression)
-      - [user-define function](#user-define-function)
-      - [Ln-Ln Linear Regression](#ln-ln-linear-regression)
-      - [diagnosis for GHG CO2 Equvivalent
+      - [User-defined Functions](#user-defined-functions)
+      - [LogLog Linear Regression](#loglog-linear-regression)
+      - [Diagnosis for GHG CO2 Equvivalent
         model:](#diagnosis-for-ghg-co2-equvivalent-model)
-      - [partial-residual plots](#partial-residual-plots)
-      - [Randome Effect: Impact among
-        Sectors](#randome-effect-impact-among-sectors)
+      - [Partial-residual plots](#partial-residual-plots)
+      - [Random effect: Impact among
+        sectors](#random-effect-impact-among-sectors)
   - [Clustering for CO2 Equvivalent](#clustering-for-co2-equvivalent)
-      - [dendrogram](#dendrogram)
+      - [Dendrogram](#dendrogram)
       - [Elbow plot](#elbow-plot)
       - [DBSCAN at eps = 4](#dbscan-at-eps-4)
-      - [check result](#check-result)
+      - [Visualize clusters](#visualize-clusters)
+  - [Discussion](#discussion)
+  - [Final Note](#final-note)
   - [Exercise](#exercise)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -40,10 +43,23 @@ recently.
 
 # Interesting question
 
-What is the scientitifc goal? What would you do if you had all the data?
-What do you want to predict or estimate? Why is this relevant to ABE
-researchers or the field? Provide some background on the rationale and
-relevance.
+The goal of this project is to study the environmental impact of a
+certain amount of production with Economic Input-Output Life Cycle
+Assessment (EIO-LCA) method, which estimates activities in our economy
+in the materials and energy resources required for and the environmental
+impact resulting from. The environmental impacts involove conventional
+air poluten (CAP), greenhouse gass (GHG), and toix release (TOX).
+Cradle-to-grave is the full Life Cycle Assessment from resource
+extraction to use phase and disposal phase. Specificallym, this analysis
+is base on the Cradle-to-grave EIO-LCA result to further understand how
+all industrial stages of producing Million Dollars product *in Dog and
+Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in
+environmental impact. The study aim to answer the following questions:
+
+1.  which industry(s) have larger impact among all industries?
+2.  what are the relationship between some impact relative to the input
+    (i.e. Energy, water withdraw)?
+3.  how the outlier industry(s) behave in linear regression models
 
 # Hightlight of result
 
@@ -153,29 +169,76 @@ psych::describe(ys) %>% knitr::kable(format = "markdown")
 | Offiste.mg         |   19 | 402 |  117607.6294 |   991341.570 |    88.5 | 2.997488e+03 |   131.2101 |   0 |  18394299 |  18394299 | 16.006124 | 285.75539 |   49443.6236 |
 | POTW.Metal.mg      |   20 | 402 |     706.3532 |     3661.431 |     0.0 | 3.324224e+01 |     0.0000 |   0 |     40218 |     40218 |  7.481724 |  61.88361 |     182.6156 |
 
+## Correlation
+
+Observation from correlation plot
+
+  - The scatter plots show most information are concentrate at the
+    origin of the feature space, but sparse anywhere else
+    (heteroskedastic);
+  - The distribution plots show variables are highly skewed (not
+    normally distributed);
+  - The spearman correlations show that most independent variables are
+    moderate correlative, but some are unlikly and some are likly
+    correlative (multicollinearity).
+
+<!-- end list -->
+
 ``` r
 # raw X variable
-psych::pairs.panels(resource, 
-                    method = "spearman")
+psych::pairs.panels(resource, method = "spearman")
 ```
 
 <img src="man/figures/README-corplot-1.png" width="100%" />
 
+The data is suitable for log transformation and could be modelled in
+LogLog transformation.
+
+con
+
+  - the interpretation of each parameter distorted from scalar to ratio
+    of the scalar quantity (i.e. For regressions, the coefficent is
+    interpret as the reletive change, in clusterings, the cluster is the
+    group of same magnitude).
+  - it is not able to fix the issue of multicollinearity, so
+    variable/model selection are required.
+
+pro
+
+  - the information at the origin can be stretched out.  
+  - the resulting linear regression can be interpreted at elastisity
+    (similar to the idea cobb-douglas utility function in Econometrics)
+
+<!-- end list -->
+
 ``` r
 # Ln X variable
-psych::pairs.panels(log(resource+1), 
-                    method = "spearman")
+psych::pairs.panels(log(resource+1), method = "spearman")
 ```
 
-<img src="man/figures/README-corplot-2.png" width="100%" />
+<img src="man/figures/README-corplot_LN-1.png" width="100%" />
 
-Let’s take CO2 Equvivalent as the target variable, resource as input
-variables as example for visulization (click
+After the log transformation, let’s take a look at the visulization of a
+5-dimemtional plot: Total CO2 Equvivalent as the target variable by
+Sectors, three resources as input variables as example (click
 [Here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
 
 # Regression
 
-## user-define function
+We are going to natural log transform both X and Y and fit regression
+models to each of 20 environmental impact variables. The six input
+resouce vairables consist of Coal.MJ, NatGase.MJ, Petrol.MJ,
+Bio.Waste.MJ, NonFossElec.MJ, and Water.Withdrawals.Kgal. The
+environmental impact variables are 7 variables for conventional air
+polutant, 5 variables for greenhouse gases, 8 variables for Toxic.
+Druding the data processing, if the count of datapoint for a target
+variable is less than 100, then we abandon the corresponding models.
+After data processing and stepwise model selections, it result 16 model
+candidates, where one for each valid target variable. The following
+user-defined function are prepared for functional programming with using
+purrr style lamda function.
+
+## User-defined Functions
 
 ``` r
 # test: target_nm = "CO.g",  X = resource
@@ -219,7 +282,7 @@ waldtest_map <- function(model, null= NULL){
 }
 ```
 
-## Ln-Ln Linear Regression
+## LogLog Linear Regression
 
 ``` r
 # create a dataframe with a column with impact variable names 
@@ -318,7 +381,7 @@ good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% un
 #> [4] "SO2.g"
 ```
 
-## diagnosis for GHG CO2 Equvivalent model:
+## Diagnosis for GHG CO2 Equvivalent model:
 
 ``` r
 par(mfrow=c(2,3))
@@ -327,7 +390,7 @@ plot(good_lm$best_model[[2]], which=1:6)
 
 <img src="man/figures/README-diagsis-1.png" width="100%" />
 
-## partial-residual plots
+## Partial-residual plots
 
 ``` r
 car::crPlots(bestglm_list$best_model[[2]])
@@ -335,7 +398,7 @@ car::crPlots(bestglm_list$best_model[[2]])
 
 <img src="man/figures/README-prplot-1.png" width="100%" />
 
-## Randome Effect: Impact among Sectors
+## Random effect: Impact among sectors
 
 ``` r
 # CO2.Fossil.t.CO2e C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
@@ -348,13 +411,13 @@ plot(good_lm$data[[i]][,1], good_lm$data[[i]][,ncol(good_lm$data[[i]])])
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 ``` r
-# random effect
+# random effect model
 data_anv <- good_lm$data[[2]] %>% select(-Description,-name_sub, -Sector_sub)
 model.rand_block <- nlme::lme(data = data_anv,
                      LnTotalgCO2e ~ LnBioWasteMJ + LnCoalMJ + LnNatGaseMJ + LnNonFossElecMJ + LnPetrolMJ,
                      random = ~1|Sector)
 # anova(model.rand_block)
-# fixed effects in the model
+# fixed effect model
 model.fixed = nlme::gls(data = data_anv,
                   LnTotalgCO2e ~ LnBioWasteMJ + LnCoalMJ + LnNatGaseMJ + LnNonFossElecMJ + LnPetrolMJ,
                   method="REML")
@@ -375,10 +438,21 @@ sectors.
 
 # Clustering for CO2 Equvivalent
 
-For instance, we are interested in what is the outlier of the industries
-to produce CO2 Equvivalent. A DBSCANS algorithm is to cluster the
-industries. The clearn data for CO2 Equvivalent is obtained from the
-`bestglm_list` object above.
+For instance, we are interested in what the outlier industries in
+producing CO2 Equvivalent. In general, we need to be extremely careful
+to rescaling data for distance based modeling that is sensitive to the
+distance between datapoints. From the above analysis, we understand this
+data is suitable in log scale. With considerations, we maintain the log
+transformation in the following distance based modeling, for reason of
+consistency and explanatory power. At this section, we are going to
+cluster the the relative size (or magnitude) of Greenhouse gases CO2
+Equvivalent among all industries, instead of the scalar quantity. We
+used a DBSCANS algorithm to cluster the industries with magnitude of
+green house gases CO2 equivalence and the magnitude of the six input
+sources variable. The clearn log-transformed data of fitting CO2
+Equvivalent linear regression is obtained from the `bestglm_list` object
+above. Then, we feed this log-transformed data to the cluster algorithm
+in python.
 
 ``` r
 # input data to clustering using python
@@ -396,9 +470,6 @@ dat_ghg %>% head %>% knitr::kable(format = "markdown")
 | 3.218876 |    6.823286 |   7.527256 |            0 |        5.921578 |               13.63874 |     12.06601 |
 | 0.000000 |    8.566174 |  10.936387 |            0 |        9.818420 |               19.14402 |     17.26302 |
 | 0.000000 |    3.784190 |   6.577861 |            0 |        3.850148 |               11.94516 |     10.94366 |
-
-We feed the data fitting linear regression model for CO2 Equvivalent to
-the cluster algorithm in python
 
 ``` r
 # use python3 engine
@@ -425,7 +496,7 @@ dat_ghg = r.dat_ghg
 dat_ghg1 = dat_ghg.iloc[:,1:]
 ```
 
-## dendrogram
+## Dendrogram
 
 ``` python
 # dendrogram
@@ -450,9 +521,9 @@ for i in np.arange(0.01, 5, 0.01):
     b = collections.Counter(a).get(-1)
     count.append(b)
 plt.plot(pd.Series(np.arange(0.01, 5, 0.01)),count)
-print(count)
-#> [390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 390, 384, 384, 384, 379, 376, 376, 376, 376, 374, 374, 369, 367, 367, 366, 366, 366, 354, 353, 350, 350, 345, 339, 336, 331, 330, 329, 326, 321, 320, 320, 317, 311, 308, 305, 303, 303, 303, 303, 303, 298, 287, 281, 269, 265, 264, 259, 256, 254, 250, 250, 245, 245, 245, 240, 240, 233, 231, 228, 227, 224, 216, 214, 213, 206, 205, 204, 203, 202, 195, 194, 192, 192, 187, 187, 186, 185, 184, 184, 178, 176, 176, 176, 168, 167, 167, 166, 165, 161, 158, 157, 156, 156, 156, 155, 154, 153, 153, 152, 152, 152, 152, 147, 147, 147, 143, 137, 137, 137, 136, 136, 136, 136, 131, 129, 123, 122, 121, 120, 120, 120, 119, 119, 119, 119, 119, 119, 119, 114, 111, 110, 110, 109, 108, 107, 106, 106, 103, 103, 102, 101, 100, 100, 100, 98, 95, 95, 95, 95, 93, 93, 93, 92, 92, 92, 91, 90, 89, 87, 87, 87, 87, 87, 85, 85, 85, 84, 82, 82, 82, 82, 79, 77, 77, 76, 76, 76, 76, 76, 74, 74, 74, 74, 74, 74, 74, 73, 73, 72, 71, 71, 70, 65, 65, 63, 63, 63, 63, 62, 61, 60, 59, 59, 58, 58, 57, 57, 56, 56, 55, 54, 54, 54, 54, 54, 53, 53, 53, 53, 49, 49, 49, 49, 48, 48, 48, 48, 46, 46, 46, 46, 45, 44, 43, 42, 41, 41, 41, 40, 39, 39, 39, 39, 39, 37, 36, 36, 36, 36, 35, 35, 35, 35, 35, 34, 34, 34, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 32, 32, 32, 32, 31, 31, 31, 30, 30, 29, 29, 29, 29, 29, 29, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 24, 24, 23, 23, 23, 21, 21, 21, 21, 21, 21, 21, 21, 21, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9]
 ```
+
+<img src="man/figures/README-elbow-1.png" width="100%" />
 
 ## DBSCAN at eps = 4
 
@@ -461,7 +532,7 @@ Cluster_ghg = DBSCAN(eps=4).fit(dat_ghg1)
 cluster_labels = Cluster_ghg.labels_
 ```
 
-## check result
+## Visualize clusters
 
 ``` r
 dat_ghg_total_co2e$Sector <- dat_ghg_total_co2e$Description
@@ -480,6 +551,17 @@ p <- ggplot(data = dat_ghg_total_co2e,
 (click
 [HERE](https://weiquanluo.github.io/img/ghg_total_co2e_cluster.html) for
 interactive plot)
+
+# Discussion
+
+# Final Note
+
+The challenges of this project:
+
+  - Manage data multicollinearity, heteroskedastic, highly right skewed.
+  - Piping data processing, functional programming, statistic extraction
+  - Communication between data processing in R and machine learning in
+    python
 
 # Exercise
 

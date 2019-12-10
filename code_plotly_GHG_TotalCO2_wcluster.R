@@ -1,8 +1,5 @@
 library(plotly)
 library(RColorBrewer)
-# Define the number of colors you want
-nb.cols <- dat$Sector %>% unique() %>% length()
-mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
 
 # calculate with formula only
 calculate_formula <- function(data, formula = y~1000*x){
@@ -16,12 +13,25 @@ calculate_formula <- function(data, formula = y~1000*x){
   return(result)
 }
 
+# const data
 X <- resource %>% 
   select(Coal.MJ, Petrol.MJ, NatGase.MJ) %>% 
   mutate_all(calculate_formula, formula = y~x+1)
 y <- GHG %>% select(Total.g.CO2e)
 data <- cbind(ID, y, X)
 
+# mask log(y)=0
+Lny <- log(y) %>% flatten() %>% unlist
+data <- data[!is.infinite(Lny),]
+
+# Define the number of colors you want
+mysymbols <- c("diamond", "circle" , "square")
+data$labels <- py$cluster_labels %>% as.factor()
+nb.cols <- dat$Sector %>% unique() %>% length()
+mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
+ 
+
+# plotly
 p <- plot_ly(data, 
              x = ~Coal.MJ, 
              y = ~Petrol.MJ, 
@@ -32,15 +42,17 @@ p <- plot_ly(data,
                                    '<br>atGase.MJ: %{z}'),
              color = ~Sector, 
              colors = mycolors,
-             marker = list(symbol = 'circle',
-                           sizemode = 'diameter'),
+             symbol = ~labels,
+             symbols = mysymbols,
+             marker = list(sizemode = 'diameter'),
              size = ~Total.g.CO2e,
              sizes = c(5,150),
              text = ~paste('<br>Sector:', Sector, 
                            '<br>Description:', Description, 
                            '<br>Sector_sub:', Sector_sub, 
                            '<br>name_sub:', name_sub,
-                           '<br>Total.g.CO2e:', Total.g.CO2e)) %>%
+                           '<br>Total.g.CO2e:', Total.g.CO2e,
+                           '<br>cluster:', labels)) %>%
   layout(title = 'Total CO2 equivalent vs Energy source (Coal, Petrol, NatGase) <br> by NAICS 2002 Sectors',
          scene = list(xaxis = list(title = 'Coal.MJ',
                                    gridcolor = 'rgb(255, 255, 255)',
@@ -57,6 +69,6 @@ p <- plot_ly(data,
                             y = 1.015,
                             text = 'Sector by NAICS 2002',
                             showarrow = FALSE))
-p
 
-htmlwidgets::saveWidget(ggplotly(p), file ="plotly_GHG_TotalCO2.html")
+htmlwidgets::saveWidget(ggplotly(p),
+                        file ="plotly_GHG_TotalCO2_wcluster.html")

@@ -199,7 +199,7 @@ htmlwidgets::saveWidget(ggplotly(p),
                         file ="plotly_GHG_TotalCO2.html")
 ```
 
-After the log transformation, let's take a look at the visulization of a 5-dimemtional plot: Total CO2 Equvivalent as the target variable by Sectors, three resources as input variables as example (click [Here](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
+Let's take a look at the visulization of plot with 5-dimemtions: Total CO2 Equvivalent as the target variable (size) by Sectors (color), three log10 scaled input resources as input variables (x,y,z)  ( [HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
 
 # Regression
 
@@ -207,7 +207,7 @@ We are going to natural log transform both X and Y and fit regression models to 
 
 ## User-defined Functions
 ```{r udfunc}
-# test: target_nm = "CO.g",  X = resource
+# test: target_nm = "Total.g.CO2e",  X = resource
 makedata_map <- function(target_nm, dat, X){
   # loglog transform
   y <- dat %>% select(target_nm)
@@ -321,6 +321,10 @@ good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% un
 
 ## Diagnosis for GHG CO2 Equvivalent model:
 
+Here is the explanation of the `Total.t.CO2e`:
+
+  Global Warming Potential (GWP) is a weighting of greenhouse gas emissions into the air from the production of each sector. Weighting factors are 100-year GWP values from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions.
+
 ```{r diagsis}
 par(mfrow=c(2,3))
 plot(good_lm$best_model[[2]], which=1:6)
@@ -335,7 +339,6 @@ car::crPlots(bestglm_list$best_model[[2]])
 ## Random effect: Impact among sectors
 
 ```{r}
-# CO2.Fossil.t.CO2e	C: Emissions of Carbon Dioxide (CO2) into the air from each sector from fossil fuel combustion sources. t CO2e = metric tons of CO2 equivalent.
 par(mfrow=c(1,2))
 i=2
 good_lm$data[[i]][,ncol(good_lm$data[[i]])] %>% boxplot()
@@ -430,11 +433,11 @@ cluster_labels = Cluster_ghg.labels_
 ## Visualize clusters
 
 ```{r cluster_point_plot}
-dat_ghg_total_co2e$Sector <- dat_ghg_total_co2e$Description
+dat_ghg_total_co2e$sector <- dat_ghg_total_co2e$Description
 dat_ghg_total_co2e$labels <- py$cluster_labels %>% as.factor()
 p <- ggplot(data = dat_ghg_total_co2e, 
             aes(text = paste("sub_Sector:", name_sub))) + 
-  geom_point(aes(x = Sector, 
+  geom_point(aes(x = sector, 
                  y = LnTotalgCO2e, 
                  color = labels)) +
   coord_flip() + 
@@ -446,7 +449,14 @@ htmlwidgets::saveWidget(ggplotly(p),
                         file ="ghg_total_co2e_cluster.html")
 ```
 
-(click [HERE](https://weiquanluo.github.io/img/ghg_total_co2e_cluster.html) for interactive plot)
+([HERE](https://weiquanluo.github.io/img/ghg_total_co2e_cluster.html) for interactive plot)
+
+
+```{r plotly_3dscater_cluster, include=FALSE}
+source("code_plotly_GHG_TotalCO2_wcluster.R")
+```
+
+Let's take a look at the visulization of plot with 6-dimemtions: Total CO2 Equvivalent as the target variable (size) by Sectors (color), three log10 scaled input resources as input variables (x,y,z) by clusters (shape) ( [HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2_wcluster.html)).
 
 # Discussion
 

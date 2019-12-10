@@ -1,7 +1,7 @@
 EIO-LCA Analysis: Pet Food Supply Chain
 ================
 Weiquan Luo, Mingjun Ma
-2019-12-09
+2019-12-10
 
   - [Background information](#background-information)
   - [Interesting question](#interesting-question)
@@ -15,9 +15,11 @@ Weiquan Luo, Mingjun Ma
       - [LogLog Linear Regression](#loglog-linear-regression)
       - [Diagnosis for GHG CO2 Equvivalent
         model:](#diagnosis-for-ghg-co2-equvivalent-model)
-      - [Partial-residual plots](#partial-residual-plots)
+          - [Added-variable plots](#added-variable-plots)
+          - [Partial-residual plots](#partial-residual-plots)
       - [Random effect: Impact among
         sectors](#random-effect-impact-among-sectors)
+      - [Interaction effect](#interaction-effect)
   - [Clustering for CO2 Equvivalent](#clustering-for-co2-equvivalent)
       - [Dendrogram](#dendrogram)
       - [DBSCAN](#dbscan)
@@ -382,12 +384,26 @@ good_lm %>% arrange(desc(adj.r.squared)) %>% select(target) %>% flatten() %>% un
 
 ## Diagnosis for GHG CO2 Equvivalent model:
 
-Here is the explanation of the `Total.t.CO2e`:
+The variable `Total.t.CO2e` refer to the Global Warming Potential (GWP),
+which is a weighting of greenhouse gas emissions into the air from the
+production of each sector. Weighting factors are 100-year GWP values
+from the IPCC Second Assessment Report (IPCC 2001). t CO2e = metric tons
+of CO2 equivalent emissions. For the resulting regression model, We see
+some issue from the diagnosis plot:
 
-Global Warming Potential (GWP) is a weighting of greenhouse gas
-emissions into the air from the production of each sector. Weighting
-factors are 100-year GWP values from the IPCC Second Assessment Report
-(IPCC 2001). t CO2e = metric tons of CO2 equivalent emissions.
+  - linearity: there some pattern in the residual plot, so it suggest
+    some other transformation. The linearity assumption seems to be
+    violated, so some further transformation is required.
+  - normality: the quantile plot show that the residual are not normally
+    distribute at the tail section, which suggest some influential
+    points, but is the least concern because we have sufficient sample
+    size.
+  - Constant variance: Scale-lacation plot show a increasing variance.
+    It suggests that we can use this regression to interpret the
+    relationship between x and y, but not to make prediction, because
+    the confident interval increase as the predictive value increase.
+
+<!-- end list -->
 
 ``` r
 par(mfrow=c(2,3))
@@ -396,7 +412,24 @@ plot(good_lm$best_model[[2]], which=1:6)
 
 <img src="man/figures/README-diagsis-1.png" width="100%" />
 
-## Partial-residual plots
+### Added-variable plots
+
+We use added-variable plots for influence analysis to check the
+existance of any influential points. We can see some points are
+considered to be influential points, such as 1, 37, 39 66, 78, 331, 318.
+
+``` r
+car::avPlots(bestglm_list$best_model[[2]])
+```
+
+<img src="man/figures/README-avplot-1.png" width="100%" />
+
+### Partial-residual plots
+
+we use partial-residual plots to reveal nonlinearity. All
+partial-residual plots did not show a obvious curve pattern, but we
+might keep the eyes on leaakge effect by `LnNonFossElecMJ` and
+`LnBioWasteMJ`.
 
 ``` r
 car::crPlots(bestglm_list$best_model[[2]])
@@ -439,7 +472,15 @@ anova(model.rand_block, model.fixed)
 
 The extremely small p-value in testing random effect suggest that there
 are significant difference in green house gases CO2 equivalence among
-sectors.
+sectors. However, random effect model are usually has less mse than
+fixed effect model.
+
+## Interaction effect
+
+The concern of variable interaction effect (effect modification) have
+not been tested for the regression. The best practise is to exam the
+interaction effect during model selection stage. So future research is
+required.
 
 # Clustering for CO2 Equvivalent
 

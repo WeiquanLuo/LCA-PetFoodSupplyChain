@@ -456,12 +456,9 @@ htmlwidgets::saveWidget(ggplotly(p),
 source("code_plotly_GHG_TotalCO2_wcluster.R")
 ```
 
-Let's take a look at the visulization of plot with 6-dimemtions: Total CO2 Equvivalent as the target variable (size) by Sectors (color), three log10 scaled input resources as input variables (x,y,z) by clusters (shape) ( [HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2_wcluster.html)).
+Let's take a look at the visulization of plot with 5-dimemtions: Total CO2 Equvivalent as the target variable (size) three log10 scaled input resources as input variables (x,y,z) by clusters (shape) ([HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2_wcluster.html)).
 
 # Discussion
-```{r}
-data %>% knitr::kable(format = "markdown") 
-```
 
 # Final Note
 

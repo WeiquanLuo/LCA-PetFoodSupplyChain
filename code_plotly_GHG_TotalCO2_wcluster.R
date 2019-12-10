@@ -26,10 +26,9 @@ data <- data[!is.infinite(Lny),]
 
 # Define the number of colors you want
 mysymbols <- c("diamond", "circle" , "square")
-data$labels <- py$cluster_labels %>% as.factor()
+labels <- py$cluster_labels %>% as.factor()
 nb.cols <- dat$Sector %>% unique() %>% length()
 mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
- 
 
 # plotly
 p <- plot_ly(data, 
@@ -39,9 +38,7 @@ p <- plot_ly(data,
              hovertemplate = paste('<b>%{text}</b>',
                                    '<br>Coal.MJ: %{x}',
                                    '<br>Petrol.MJ: %{y}',
-                                   '<br>atGase.MJ: %{z}'),
-             color = ~Sector, 
-             colors = mycolors,
+                                   '<br>Gase.MJ: %{z}'),
              symbol = ~labels,
              symbols = mysymbols,
              marker = list(sizemode = 'diameter'),
@@ -53,7 +50,7 @@ p <- plot_ly(data,
                            '<br>name_sub:', name_sub,
                            '<br>Total.g.CO2e:', Total.g.CO2e,
                            '<br>cluster:', labels)) %>%
-  layout(title = 'Total CO2 equivalent vs Energy source (Coal, Petrol, NatGase) <br> by NAICS 2002 Sectors',
+  layout(title = 'Total CO2 equivalent vs Energy source (Coal, Petrol, NatGase) <br> by clusters',
          scene = list(xaxis = list(title = 'Coal.MJ',
                                    gridcolor = 'rgb(255, 255, 255)',
                                    type = 'log'),

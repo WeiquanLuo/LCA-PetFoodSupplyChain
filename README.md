@@ -612,6 +612,12 @@ resources as input variables (x,y,z) by clusters (shape)
 
 # Final Note
 
+Our first pass analysis gives a general idea of the dog and cat
+manufactory life cycle. by clustering, we are able to identify the
+outlier industries. by doing regression, we are able to identify the
+influent industries. Combining the results, we have an overview of how
+the dog and cat manufactory life cycle affects the environmental impact.
+
 The challenges of this project:
 
   - Manage data multicollinearity, heteroskedastic, highly right skewed.

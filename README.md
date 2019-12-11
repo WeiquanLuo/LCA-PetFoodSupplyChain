@@ -624,4 +624,4 @@ The challenges of this project:
 
 # Exercise
 
-Please, click [HERE]() to Exercise.
+Please, click [HERE](%22Class%20Exercise.ipynb%22) to Exercise.

@@ -491,4 +491,4 @@ The challenges of this project:
 
 # Exercise
 
-Please, click [HERE]() to Exercise.
+Please, click [HERE]("Class Exercise.ipynb") to Exercise.

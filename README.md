@@ -1,7 +1,7 @@
 EIO-LCA Analysis: Pet Food Supply Chain
 ================
 Weiquan Luo, Mingjun Ma
-2019-12-10
+2019-12-11
 
   - [Background information](#background-information)
   - [Interesting question](#interesting-question)
@@ -48,7 +48,7 @@ The goal of this project is to study the environmental impact of a
 certain amount of production with Economic Input-Output Life Cycle
 Assessment (EIO-LCA) method, which estimates activities in our economy
 in the materials and energy resources required for and the environmental
-impact resulting from. The environmental impacts involove conventional
+impact resulting from. The environmental impacts involve conventional
 air poluten (CAP), greenhouse gass (GHG), and toix release (TOX).
 Cradle-to-grave is the full Life Cycle Assessment from resource
 extraction to use phase and disposal phase. Specificallym, this analysis
@@ -57,20 +57,25 @@ all industrial stages of producing Million Dollars product *in Dog and
 Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in
 environmental impact. The study aim to answer the following questions:
 
-1.  which industry(s) have larger impact among all industries?
-2.  what are the relationship between some impact relative to the input
-    (i.e. Energy, water withdraw)?
-3.  how the outlier industry(s) behave in linear regression models
+1.  as the economic growth, how is the environmental impact increase as
+    more product are product, by assuming resource input and the
+    production is proportional.
+2.  what are the relationship between environmental impacts and six
+    defined resource inputs?
+3.  Is there any industry(s) has extraordinary environmental impact
+    compared to other?
 
 # Hightlight of result
 
+  - On average, as production increase by 1%, most environmental impacts
+    increase by more than 1%, but toxic production increase by less than
+    1%.
   - for dog and cat food Manufacturing, the greatest environmental
-    impacts come frome any raw material production industries such as
-    agricultural farming.
-  - most of industries use either NonFossoil Eletrecity or Fossoil
-    Eletrecity
-  - for those industries using biowaste as energy source have higher
-    impact in toxic.
+    impacts come from raw material production industries such as
+    agricultural farming, and utility sector of Electric Power
+    Generation, Transmission and Distribution
+  - the industries using biowaste as energy source have higher impact in
+    toxic.
 
 # Data description
 

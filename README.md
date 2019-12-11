@@ -201,7 +201,7 @@ con
   - the interpretation of each parameter distorted from scalar to ratio
     of the scalar quantity (i.e. For regressions, the coefficent is
     interpret as the reletive change, in clusterings, the cluster is the
-    group of same magnitude).
+    group of similar magnitude).
   - it is not able to fix the issue of multicollinearity, so
     variable/model selection are required.
 
@@ -624,4 +624,6 @@ The challenges of this project:
 
 # Exercise
 
-Please, click [HERE](%22Class%20Exercise.ipynb%22) to Exercise.
+Please, click
+[HERE](https://github.com/WeiquanLuo/LCA-PetFoodSupplyChain/code_Exercise.ipynb)
+to Exercise.

@@ -65,9 +65,9 @@ environmental impact. The study aim to answer the following questions:
 
 # Hightlight of result
 
-  - by increasing pet food production by 1%, most environmental impacts
-    increase by more than 1%, but toxic increase by less than 1% on
-    average.
+  - on average, by increasing pet food production by 1%, most
+    environmental impacts increase by more than 1%, but toxic increase
+    by less than 1%
   - in pet food manufacturing, the greatest environmental impacts come
     from agricultural farming sector, and the utility sector of Electric
     Power Generation, Transmission and Distribution.

@@ -222,8 +222,8 @@ psych::pairs.panels(log(resource+1), method = "spearman")
 
 Let’s take a look at the visulization of plot with 5-dimemtions: Total
 CO2 Equvivalent as the target variable (size) by Sectors (color), three
-log10 scaled input resources as input variables (x,y,z) (
-[HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
+log10 scaled input resources as input variables (x,y,z)
+([HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2.html)).
 
 # Regression
 
@@ -624,6 +624,4 @@ The challenges of this project:
 
 # Exercise
 
-Please, click
-[HERE](https://github.com/WeiquanLuo/LCA-PetFoodSupplyChain/code_Exercise.ipynb)
-to Exercise.
+Please, open the `code_Exercise.ipynb` to for exercise.

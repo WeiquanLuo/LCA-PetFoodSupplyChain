@@ -35,6 +35,7 @@ The goal of this project is to study the environmental impact of a certain amoun
 * in pet food manufacturing, the greatest environmental impacts come from agricultural farming sector, and the utility sector of Electric Power Generation, Transmission and Distribution.
 * the industries using biowaste energy have higher impact in toxic.
 
+
 # Data description
 The dataset for this project is the first pass life cycle assessment results for cat and dog food manufacturing. It provides the environmental impact information into the pet food supply chain. The LCA data was generated through EIO-LCA website(http://www.eiolca.net/cgi-bin/dft/use.pl).  The model for getting the LCA data is US 2002 producer price benchmark. In order to get the dog and cat food manufacturing LCA data, the user needs to select “Food beverage and tobacco” sector group, dog and cat food manufacturing sector and then the amount of economic activity for this sector(e.g. 1 millon dollars). After setting up the sector and economic parameters, The user could select different economical and environmental impact to get the LCA results.
 The LCA results are ready for downloading as excel files. The raw data was lacking the columns name for different impact feature and index for identifying the different sectors and sector group. The web scraping is necessary for the columns name and NAICS sector code. 

@@ -24,7 +24,6 @@ Weiquan Luo, Mingjun Ma
       - [Dendrogram](#dendrogram)
       - [DBSCAN](#dbscan)
       - [Visualize clusters](#visualize-clusters)
-  - [Discussion](#discussion)
   - [Final Note](#final-note)
   - [Exercise](#exercise)
 
@@ -610,8 +609,6 @@ Let’s take a look at the visulization of plot with 5-dimemtions: Total
 CO2 Equvivalent as the target variable (size) three log10 scaled input
 resources as input variables (x,y,z) by clusters (shape)
 ([HERE](https://weiquanluo.github.io/img/plotly_GHG_TotalCO2_wcluster.html)).
-
-# Discussion
 
 # Final Note
 

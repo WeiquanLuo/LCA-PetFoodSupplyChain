@@ -24,18 +24,16 @@ According to the APPA (American Pet Product Association) 2019-2020 pet owner sur
 
 # Interesting question
 
-The goal of this project is to study the environmental impact of a certain amount of production with Economic Input-Output Life Cycle Assessment (EIO-LCA) method, which estimates activities in our economy in the materials and energy resources required for and the environmental impact resulting from. The environmental impacts involove conventional air poluten (CAP), greenhouse gass (GHG), and toix release (TOX). Cradle-to-grave is the full Life Cycle Assessment from resource extraction to use phase and disposal phase. Specificallym, this analysis is base on the Cradle-to-grave EIO-LCA result to further understand how all industrial stages of producing Million Dollars product *in Dog and Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in environmental impact. The study aim to answer the following questions:
+The goal of this project is to study the environmental impact of a certain amount of production with Economic Input-Output Life Cycle Assessment (EIO-LCA) method, which estimates activities in our economy in the materials and energy resources required for and the environmental impact resulting from. The environmental impacts involve conventional air poluten (CAP), greenhouse gass (GHG), and toix release (TOX). Cradle-to-grave is the full Life Cycle Assessment from resource extraction to use phase and disposal phase. Specificallym, this analysis is base on the Cradle-to-grave EIO-LCA result to further understand how all industrial stages of producing Million Dollars product *in Dog and Cat Food Manufacturing* (code 311111 in NAICS 2002) are different in environmental impact. The study aim to answer the following questions:
 
-1.  which industry(s) have larger impact among all industries?
-2.  what are the relationship between some impact relative to the input (i.e. Energy, water withdraw)?
-3.  how the outlier industry(s) behave in linear regression models
-
+1. as the pet food economic growth, how does increase in production inflence the environmental impacts, by assuming input of resource and output of production are proportional.
+3. Is there any industry(s) has extraordinary environmental impact compared to other?
 
 # Hightlight of result
 
-* for dog and cat food Manufacturing, the greatest environmental impacts come frome any raw material production industries such as agricultural farming.
-* most of industries use either NonFossoil Eletrecity or Fossoil Eletrecity
-* for those industries using biowaste as energy source have higher impact in toxic.
+* by increasing pet food production by 1%, most environmental impacts increase by more than 1%, but toxic increase by less than 1% on average.
+* in pet food manufacturing, the greatest environmental impacts come from agricultural farming sector, and the utility sector of Electric Power Generation, Transmission and Distribution.
+* the industries using biowaste energy have higher impact in toxic.
 
 # Data description
 The dataset for this project is the first pass life cycle assessment results for cat and dog food manufacturing. It provides the environmental impact information into the pet food supply chain. The LCA data was generated through EIO-LCA website(http://www.eiolca.net/cgi-bin/dft/use.pl).  The model for getting the LCA data is US 2002 producer price benchmark. In order to get the dog and cat food manufacturing LCA data, the user needs to select “Food beverage and tobacco” sector group, dog and cat food manufacturing sector and then the amount of economic activity for this sector(e.g. 1 millon dollars). After setting up the sector and economic parameters, The user could select different economical and environmental impact to get the LCA results.
@@ -46,7 +44,6 @@ The LCA results are ready for downloading as excel files. The raw data was lacki
 <center>
 ![EIO-LCA:Pet Food Supply Chain](img/EIO-LCA_ Pet Food Supply Chain.png){width=100%}
 </center>
-
 
 ```{r pkg, include=FALSE}
 library(dplyr)

@@ -200,7 +200,7 @@ Let's take a look at the visulization of plot with 5-dimemtions: Total CO2 Equvi
 
 # Regression
 
-We are going to natural log transform both X and Y and fit regression models to each of 20 environmental impact variables. The six input resouce vairables consist of Coal.MJ, NatGase.MJ, Petrol.MJ, Bio.Waste.MJ, NonFossElec.MJ, and Water.Withdrawals.Kgal. The environmental impact variables are 7 variables for conventional air polutant, 5 variables for greenhouse gases, 8 variables for Toxic. Druding the data processing, if the count of datapoint for a target variable is less than 100, then we abandon the corresponding models. After data processing and stepwise model selections, it result 16 model candidates, where one for each valid target variable. The following user-defined function are prepared for functional programming with using purrr style lamda function.
+We are going to natural log transform both X and Y and fit regression models to each of 20 environmental impact variables. The six input resouce vairables consist of Coal.MJ, NatGase.MJ, Petrol.MJ, Bio.Waste.MJ, NonFossElec.MJ, and Water.Withdrawals.Kgal. The environmental impact variables are 7 variables for conventional air polutant, 5 variables for greenhouse gases, 8 variables for Toxic. Druding the data processing, if the count of datapoint for a target variable is less than 100, then we abandon the corresponding models. After data processing and stepwise model selections, it result 16 model candidates, where one for each valid target variable. The following user-defined function are prepared for functional programming with using purrr style lamda function. 
 
 ## User-defined Functions
 ```{r udfunc}
@@ -246,6 +246,15 @@ waldtest_map <- function(model, null= NULL){
 ```
 
 ## LogLog Linear Regression
+
+
+To fit each of 20 regression model, we pipe up 5 processes:
+
+1. data processing, 
+2. varibale selection through stepwise linear model selection. (Help to select non multicoliner variable to be in the model)
+3. anova, 
+4. extract statistic, 
+5. wild test. (To test the exponent sum is equal =1, to see if there is a economy of scale)
 
 ```{r glm_fit}
 # create a dataframe with a column with impact variable names 
@@ -301,6 +310,8 @@ coef_signif_list <- bestglm_list %>%
 # get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
+
+So we have 20 linear regression models for each environmental impact. 
 
 ```{r coef_signif_list}
 # result
@@ -429,7 +440,7 @@ plt.show()
 
 ## DBSCAN
 
-To better seperate those outliers from the main cluster, we decide to use DBSCAN to cluster the data.
+To better seperate those outliers from the main cluster, we decide to use DBSCAN to cluster the data. Y-axis is instance in the largest cluster。x-axis is the hyper-paramter `eps`.
 
 
 ```{python elbow}

@@ -1,7 +1,7 @@
 EIO-LCA Analysis: Pet Food Supply Chain
 ================
 Weiquan Luo, Mingjun Ma
-2019-12-11
+2019-12-16
 
   - [Background information](#background-information)
   - [Interesting question](#interesting-question)
@@ -285,6 +285,18 @@ waldtest_map <- function(model, null= NULL){
 
 ## LogLog Linear Regression
 
+To fit each of 20 regression model, we pipe up 5 processes:
+
+1.  data processing,
+2.  varibale selection through stepwise linear model selection. (Help to
+    select non multicoliner variable to be in the model)
+3.  anova,
+4.  extract statistic,
+5.  wild test. (To test the exponent sum is equal =1, to see if there is
+    a economy of scale)
+
+<!-- end list -->
+
 ``` r
 # create a dataframe with a column with impact variable names 
 target_list <- tibble(target = c(colnames(CPA),colnames(GHG),colnames(TOX))); target_list %>% flatten() %>% unlist()
@@ -346,6 +358,8 @@ coef_signif_list <- bestglm_list %>%
 # get exponent_sum
 coef_signif_list$exponent_sum <- coef_list[,3:8] %>% rowSums(na.rm = TRUE) %>% signif(digits = 3)
 ```
+
+So we have 20 linear regression models for each environmental impact.
 
 ``` r
 # result
@@ -564,7 +578,8 @@ plt.show()
 ## DBSCAN
 
 To better seperate those outliers from the main cluster, we decide to
-use DBSCAN to cluster the data.
+use DBSCAN to cluster the data. Y-axis is instance in the largest
+cluster。x-axis is the hyper-paramter `eps`.
 
 ``` python
 # Elbow plot: number of instance in cluster by hyperparameter eps
